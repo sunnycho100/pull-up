@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pull Up — Design Comparison</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, system-ui, sans-serif; background: #f4f4f5; color: #18181b; }
+  header { padding: 20px 24px; border-bottom: 1px solid #e4e4e7; background: #fff; }
+  h1 { margin: 0 0 4px; font-size: 20px; }
+  header p { margin: 0; color: #52525b; font-size: 14px; }
+  .row { display: flex; gap: 20px; padding: 24px; overflow-x: auto; align-items: flex-start; }
+  .col { flex: 0 0 auto; width: 430px; }
+  .col h2 { font-size: 15px; margin: 0 0 2px; }
+  .col .sub { font-size: 13px; color: #52525b; margin: 0 0 10px; }
+  iframe { width: 430px; height: 2400px; border: 1px solid #e4e4e7; border-radius: 12px; background: #fff; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Pull Up — three design directions</h1>
+  <p>Same content, three skins. Judge hardest on the middle screen (the group reveal).</p>
+</header>
+<div class="row">
+  <div class="col">
+    <h2>1 · Golden Hour</h2>
+    <p class="sub">warm cream + coral, candlelit place settings</p>
+    <iframe src="01-golden-hour.html" title="Golden Hour"></iframe>
+  </div>
+  <div class="col">
+    <h2>2 · Precision</h2>
+    <p class="sub">Stripe-style white + blurple, judge-ready polish</p>
+    <iframe src="02-precision.html" title="Precision"></iframe>
+  </div>
+  <div class="col">
+    <h2>3 · Tonight's Menu</h2>
+    <p class="sub">editorial serif menu-card, wax-seal reveal</p>
+    <iframe src="03-tonights-menu.html" title="Tonights Menu"></iframe>
+  </div>
+</div>
+</body>
+</html>

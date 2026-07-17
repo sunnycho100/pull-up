@@ -1,0 +1,635 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pull Up — Tonight's Menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    /* paper + ink */
+    --paper:      #f5efe2;
+    --paper-2:    #efe7d6;
+    --card:       #fbf7ee;
+    --ink:        #221d17;
+    --ink-soft:   #4a4137;
+    --muted:      #857a68;
+    --line:       #d9cdb6;
+    --line-soft:  #e7ddc9;
+    /* accents */
+    --oxblood:    #7c2a24;
+    --oxblood-2:  #9a3a30;
+    --brass:      #a2803c;
+    --brass-lo:   #b89a5c;
+
+    --serif: "EB Garamond", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --display: "Playfair Display", "Iowan Old Style", "Times New Roman", Georgia, serif;
+    --sans: ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+
+    --z-stamp: 5;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{ margin:0; }
+
+  body{
+    font-family:var(--serif);
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 700px at 20% -10%, #6a5f4d 0%, #3f382c 45%, #2a251c 100%);
+    min-height:100vh;
+    padding:48px 20px 72px;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  .wall{
+    display:flex;
+    flex-wrap:wrap;
+    gap:56px 44px;
+    justify-content:center;
+    align-items:flex-start;
+    max-width:1360px;
+    margin:0 auto;
+  }
+
+  .col{ width:390px; max-width:100%; }
+
+  .col-label{
+    font-family:var(--sans);
+    font-size:11px;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    color:#d9cdb6;
+    opacity:.85;
+    margin:0 0 14px 6px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .col-label::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg, #b6a988 0%, transparent 100%); }
+
+  /* ---------- phone frame ---------- */
+  .phone{
+    width:390px;
+    max-width:100%;
+    background:var(--paper);
+    border-radius:38px;
+    padding:12px;
+    box-shadow:
+      0 2px 0 rgba(255,255,255,.06) inset,
+      0 40px 70px -30px rgba(0,0,0,.65),
+      0 8px 22px -12px rgba(0,0,0,.5);
+  }
+  .frame-inner{ position:relative; }
+  .screen{
+    position:relative;
+    min-height:748px;
+    border-radius:28px;
+    overflow:hidden;
+    background:var(--paper);
+    background-image:
+      radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,.55), transparent 60%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='0.045'/></svg>");
+    display:flex;
+    flex-direction:column;
+  }
+  .notch{
+    position:absolute; top:11px; left:50%; transform:translateX(-50%);
+    width:120px; height:6px; border-radius:99px;
+    background:rgba(34,29,23,.16);
+    z-index:6;
+  }
+  .scroll{ flex:1; overflow:visible; }
+  .pad{ padding:34px 26px 26px; }
+
+  /* ---------- shared menu bits ---------- */
+  .flourish{
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    color:var(--brass); font-size:13px; letter-spacing:.3em;
+  }
+  .flourish::before,.flourish::after{
+    content:""; width:44px; height:1px;
+    background:linear-gradient(90deg, transparent, var(--brass-lo));
+  }
+  .flourish::after{ transform:scaleX(-1); }
+
+  .kicker{
+    font-family:var(--sans);
+    font-size:10.5px; letter-spacing:.42em; text-transform:uppercase;
+    color:var(--muted);
+    text-align:center;
+  }
+
+  .masthead{ text-align:center; }
+  .masthead h1{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:52px;
+    line-height:.92;
+    letter-spacing:-.02em;
+    margin:12px 0 8px;
+    color:var(--ink);
+  }
+  .masthead .tag{
+    font-style:italic;
+    font-size:16px;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  .rule{ height:1px; background:var(--line); margin:22px 0; border:0; }
+  .rule.double{
+    height:4px; background:none;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin:2px 0 4px;
+  }
+  .section-head h2{
+    font-family:var(--display); font-weight:600;
+    font-size:21px; margin:0; letter-spacing:.01em;
+  }
+  .section-head .side{
+    font-family:var(--sans); font-size:10px; letter-spacing:.28em;
+    text-transform:uppercase; color:var(--muted);
+  }
+
+  /* ---------- screen 1 : seatings ---------- */
+  .course{ padding:18px 0; position:relative; }
+  .course + .course{ border-top:1px solid var(--line-soft); }
+
+  .course-top{ display:flex; align-items:flex-start; gap:14px; }
+  .numeral{
+    font-family:var(--display); font-weight:600; font-style:italic;
+    font-size:20px; color:var(--brass);
+    line-height:1; padding-top:3px; min-width:26px;
+  }
+  .course-body{ flex:1; min-width:0; }
+  .course-title-row{
+    display:flex; align-items:baseline; gap:8px;
+  }
+  .course-title{
+    font-family:var(--display); font-weight:600; font-size:20px;
+    color:var(--ink); white-space:nowrap;
+  }
+  .leaders{
+    flex:1; height:0; border-bottom:1.5px dotted var(--line);
+    transform:translateY(-4px);
+  }
+  .course-when{
+    font-family:var(--sans); font-size:11px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--oxblood);
+    white-space:nowrap;
+  }
+  .course-desc{
+    font-style:italic; color:var(--ink-soft); font-size:15px;
+    margin:5px 0 0;
+  }
+  .course-foot{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:12px; gap:12px;
+  }
+  .seated{
+    font-family:var(--sans); font-size:11px; letter-spacing:.06em;
+    color:var(--muted); display:flex; align-items:center; gap:7px;
+  }
+  .dot{ width:5px; height:5px; border-radius:99px; background:var(--brass); box-shadow:0 0 0 3px rgba(162,128,60,.16); }
+
+  .btn-join{
+    font-family:var(--sans); font-size:11px; letter-spacing:.22em;
+    text-transform:uppercase; font-weight:600;
+    color:var(--oxblood);
+    background:transparent;
+    border:1px solid var(--oxblood);
+    border-radius:99px;
+    padding:8px 18px; cursor:pointer;
+    transition:background .35s cubic-bezier(.2,.8,.2,1), color .35s;
+  }
+  .btn-join:hover{ background:var(--oxblood); color:#fbf3e6; }
+
+  .course.mine{
+    background:linear-gradient(90deg, rgba(124,42,36,.05), rgba(124,42,36,0) 70%);
+    border-radius:14px;
+    padding-left:14px; padding-right:12px;
+    margin:6px -12px 0;
+  }
+  .stamp-in{
+    font-family:var(--sans); font-size:11px; letter-spacing:.22em;
+    text-transform:uppercase; font-weight:700;
+    color:#fbf3e6; background:var(--oxblood);
+    border-radius:99px; padding:8px 16px;
+    display:inline-flex; align-items:center; gap:7px;
+  }
+  .check{ width:13px; height:13px; }
+
+  .footer-note{
+    text-align:center; font-style:italic; color:var(--muted);
+    font-size:13px; margin:20px 0 0;
+  }
+
+  /* ---------- screen 2 : the reveal ---------- */
+  .reveal{
+    background:
+      radial-gradient(130% 80% at 50% -8%, rgba(255,255,255,.6), transparent 55%),
+      linear-gradient(180deg, #f7f1e4 0%, #f1e8d6 100%);
+  }
+  .reveal .pad{ padding:30px 26px 24px; }
+
+  .ctx{
+    text-align:center; font-family:var(--sans);
+    font-size:10.5px; letter-spacing:.32em; text-transform:uppercase;
+    color:var(--muted);
+  }
+  .reveal-h{
+    font-family:var(--display); font-weight:700;
+    font-size:33px; line-height:1.02; letter-spacing:-.015em;
+    text-align:center; margin:12px 0 0; text-wrap:balance;
+    color:var(--ink);
+  }
+  .reveal-h em{ font-style:italic; color:var(--oxblood); }
+
+  .crest{
+    width:96px; height:96px; margin:18px auto 6px; position:relative;
+    display:grid; place-items:center;
+    color:#f6ead3;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 34% 30%, var(--oxblood-2), var(--oxblood) 58%, #5f1f1a 100%);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.18) inset,
+      0 0 0 5px var(--paper),
+      0 0 0 6px rgba(162,128,60,.55),
+      0 14px 26px -12px rgba(95,31,26,.7);
+    animation:seal .9s cubic-bezier(.2,.85,.25,1) both;
+  }
+  @keyframes seal{ from{ transform:scale(.6) rotate(-8deg); opacity:0 } to{ transform:none; opacity:1 } }
+  .crest .no{ font-family:var(--display); font-weight:700; font-size:38px; line-height:1; }
+  .crest .lbl{
+    position:absolute; bottom:15px; font-family:var(--sans);
+    font-size:7.5px; letter-spacing:.34em; text-transform:uppercase; opacity:.9;
+  }
+  .crest .lbl.top{ top:16px; bottom:auto; }
+
+  .party{
+    text-align:center; font-style:italic; color:var(--ink-soft);
+    font-size:16px; margin:2px 0 6px;
+  }
+  .party b{ font-style:normal; font-weight:600; color:var(--ink); }
+
+  .lineup{ margin:8px 0 0; }
+  .member{
+    display:flex; align-items:center; gap:14px;
+    padding:11px 2px;
+  }
+  .member + .member{ border-top:1px solid var(--line-soft); }
+  .plate{
+    width:38px; height:38px; flex:none; border-radius:50%;
+    display:grid; place-items:center;
+    font-family:var(--display); font-weight:600; font-size:16px;
+    color:var(--oxblood);
+    background:var(--card);
+    box-shadow:0 0 0 1px var(--line) inset, 0 0 0 3px rgba(162,128,60,.14) inset;
+  }
+  .m-body{ flex:1; min-width:0; }
+  .m-name{ font-family:var(--display); font-weight:600; font-size:17px; line-height:1.1; }
+  .m-name span{ font-family:var(--serif); font-weight:400; font-style:italic; font-size:13.5px; color:var(--muted); }
+  .m-meta{ font-family:var(--sans); font-size:11px; letter-spacing:.03em; color:var(--ink-soft); margin-top:2px; }
+
+  .note{
+    position:relative; margin:20px 0 0;
+    padding:20px 20px 18px;
+    background:var(--card);
+    border-radius:4px;
+    box-shadow:0 0 0 1px var(--line) inset;
+  }
+  .note::before{
+    content:"“"; position:absolute; top:-12px; left:14px;
+    font-family:var(--display); font-size:56px; color:var(--brass); line-height:1;
+  }
+  .note .note-k{
+    font-family:var(--sans); font-size:9.5px; letter-spacing:.34em;
+    text-transform:uppercase; color:var(--brass); margin:0 0 8px;
+  }
+  .note p{
+    margin:0; font-style:italic; font-size:16.5px; line-height:1.5;
+    color:var(--ink); text-wrap:pretty;
+  }
+  .note .sig{
+    font-style:italic; color:var(--muted); font-size:13px;
+    margin:10px 0 0; text-align:right;
+  }
+
+  .featured{
+    margin:18px 0 0; padding-top:16px;
+    border-top:1px solid var(--line);
+    display:flex; align-items:flex-start; gap:14px;
+  }
+  .featured .fnum{
+    font-family:var(--display); font-style:italic; font-weight:600;
+    color:var(--brass); font-size:20px; line-height:1; padding-top:2px;
+  }
+  .f-body{ flex:1; }
+  .f-top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .f-name{ font-family:var(--display); font-weight:600; font-size:19px; }
+  .f-price{ font-family:var(--sans); font-size:12px; letter-spacing:.12em; color:var(--oxblood); }
+  .f-desc{ font-style:italic; color:var(--ink-soft); font-size:14.5px; margin:3px 0 0; }
+  .f-meta{
+    font-family:var(--sans); font-size:11px; letter-spacing:.06em;
+    color:var(--muted); margin-top:6px;
+  }
+  .f-meta b{ color:var(--ink); font-weight:600; }
+
+  .cta{
+    display:block; width:100%; margin-top:20px;
+    font-family:var(--sans); font-size:12.5px; letter-spacing:.22em;
+    text-transform:uppercase; font-weight:600;
+    color:#fbf3e6; background:var(--oxblood);
+    border:0; border-radius:99px; padding:16px; cursor:pointer;
+    box-shadow:0 10px 22px -12px rgba(95,31,26,.8);
+    transition:transform .3s cubic-bezier(.2,.8,.2,1), background .3s;
+  }
+  .cta:hover{ background:var(--oxblood-2); transform:translateY(-1px); }
+
+  /* ---------- screen 3 : chat ---------- */
+  .chat-head{
+    padding:20px 22px 16px; border-bottom:1px solid var(--line);
+    background:var(--card);
+  }
+  .chat-head .ct{
+    font-family:var(--display); font-weight:600; font-size:20px;
+    display:flex; align-items:center; gap:9px;
+  }
+  .chat-head .badge{
+    font-family:var(--display); font-weight:700; font-size:12px;
+    color:#f6ead3; background:var(--oxblood);
+    width:24px; height:24px; border-radius:50%;
+    display:grid; place-items:center;
+    box-shadow:0 0 0 2px rgba(162,128,60,.5);
+  }
+  .chat-head .cs{
+    font-family:var(--sans); font-size:10.5px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--muted); margin-top:5px;
+  }
+
+  .thread{ padding:20px 20px 12px; display:flex; flex-direction:column; gap:15px; }
+  .msg{ max-width:82%; }
+  .msg .who{
+    font-family:var(--sans); font-size:10px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--muted); margin:0 0 4px 4px;
+  }
+  .bubble{
+    font-size:15.5px; line-height:1.42; color:var(--ink);
+    background:var(--card); padding:10px 14px;
+    border-radius:4px 15px 15px 15px;
+    box-shadow:0 0 0 1px var(--line-soft) inset;
+  }
+  .msg.me{ align-self:flex-end; }
+  .msg.me .who{ text-align:right; margin:0 4px 4px 0; color:var(--oxblood); }
+  .msg.me .bubble{
+    background:linear-gradient(180deg, #843029, var(--oxblood));
+    color:#f7ecdb; border-radius:15px 4px 15px 15px;
+    box-shadow:0 6px 16px -10px rgba(95,31,26,.8);
+  }
+
+  .composer{
+    margin-top:auto; padding:12px 16px 16px;
+    border-top:1px solid var(--line); background:var(--card);
+    display:flex; align-items:center; gap:10px;
+  }
+  .composer .field{
+    flex:1; font-family:var(--serif); font-style:italic; font-size:15px;
+    color:var(--muted);
+    background:var(--paper); border:1px solid var(--line);
+    border-radius:99px; padding:11px 16px;
+  }
+  .composer .send{
+    width:42px; height:42px; flex:none; border-radius:50%;
+    background:var(--oxblood); border:0; cursor:pointer;
+    display:grid; place-items:center;
+    box-shadow:0 6px 16px -10px rgba(95,31,26,.9);
+  }
+  .composer .send svg{ width:18px; height:18px; transform:translateX(1px); }
+
+  @media (prefers-reduced-motion: reduce){
+    .crest{ animation:none; }
+    .cta,.btn-join{ transition:none; }
+  }
+</style>
+
+<div class="wall">
+
+  <!-- ============ 1 · SLOTS ============ -->
+  <section class="col">
+    <p class="col-label">1 · Slots</p>
+    <div class="phone"><div class="frame-inner"><div class="screen">
+      <div class="notch"></div>
+      <div class="scroll"><div class="pad">
+
+        <div class="masthead">
+          <div class="flourish">EST. UKC 2026</div>
+          <h1>Pull&nbsp;Up</h1>
+          <p class="tag">Find your table at UKC 2026.</p>
+        </div>
+
+        <hr class="rule double">
+
+        <div class="section-head">
+          <h2>Tonight&rsquo;s Seatings</h2>
+          <span class="side">Prix&nbsp;Fixe</span>
+        </div>
+
+        <div class="course">
+          <div class="course-top">
+            <div class="numeral">I</div>
+            <div class="course-body">
+              <div class="course-title-row">
+                <span class="course-title">Day 1 Dinner</span>
+                <span class="leaders"></span>
+                <span class="course-when">Wed · 7:00</span>
+              </div>
+              <p class="course-desc">Downtown &mdash; the opening night table.</p>
+              <div class="course-foot">
+                <span class="seated"><span class="dot"></span>18 seated so far</span>
+                <button class="btn-join">Join</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="course">
+          <div class="course-top">
+            <div class="numeral">II</div>
+            <div class="course-body">
+              <div class="course-title-row">
+                <span class="course-title">Day 2 Lunch</span>
+                <span class="leaders"></span>
+                <span class="course-when">Thu · 12:30</span>
+              </div>
+              <p class="course-desc">Convention Center &mdash; a midday break between sessions.</p>
+              <div class="course-foot">
+                <span class="seated"><span class="dot"></span>9 seated so far</span>
+                <button class="btn-join">Join</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="course mine">
+          <div class="course-top">
+            <div class="numeral">III</div>
+            <div class="course-body">
+              <div class="course-title-row">
+                <span class="course-title">Day 2 Dinner</span>
+                <span class="leaders"></span>
+                <span class="course-when">Thu · 7:30</span>
+              </div>
+              <p class="course-desc">K-town &mdash; the late table, where 국밥 happens.</p>
+              <div class="course-foot">
+                <span class="seated"><span class="dot"></span>24 seated so far</span>
+                <span class="stamp-in">
+                  <svg class="check" viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="#fbf3e6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  You&rsquo;re in
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="footer-note">Seating is matched by taste, not by table number.</p>
+
+      </div></div>
+    </div></div></div>
+  </section>
+
+  <!-- ============ 2 · REVEAL ============ -->
+  <section class="col">
+    <p class="col-label">2 · Reveal</p>
+    <div class="phone"><div class="frame-inner"><div class="screen reveal">
+      <div class="notch"></div>
+      <div class="scroll"><div class="pad">
+
+        <p class="ctx">Day 2 Dinner · Thu 7:30 PM · K-town</p>
+        <h2 class="reveal-h">Your table<br>is <em>set.</em></h2>
+
+        <div class="crest">
+          <span class="lbl top">Table</span>
+          <span class="no">3</span>
+          <span class="lbl">Party of 5</span>
+        </div>
+        <p class="party"><b>Table No. 3</b> &mdash; a party of five</p>
+
+        <hr class="rule">
+
+        <div class="lineup">
+          <div class="member">
+            <div class="plate">S</div>
+            <div class="m-body">
+              <div class="m-name">성환 <span>Sunghwan</span></div>
+              <div class="m-meta">UW–Madison · Robotics / Perception</div>
+            </div>
+          </div>
+          <div class="member">
+            <div class="plate">J</div>
+            <div class="m-body">
+              <div class="m-name">지원 <span>Jiwon</span></div>
+              <div class="m-meta">U Maryland · NLP / Agents</div>
+            </div>
+          </div>
+          <div class="member">
+            <div class="plate">D</div>
+            <div class="m-body">
+              <div class="m-name">David Kim</div>
+              <div class="m-meta">Georgia Tech · Computer Vision</div>
+            </div>
+          </div>
+          <div class="member">
+            <div class="plate">Y</div>
+            <div class="m-body">
+              <div class="m-name">Yuna Park</div>
+              <div class="m-meta">UIUC · HCI / Design</div>
+            </div>
+          </div>
+          <div class="member">
+            <div class="plate">M</div>
+            <div class="m-body">
+              <div class="m-name">민준 <span>Minjun</span></div>
+              <div class="m-meta">UT Austin · Reinforcement Learning</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note">
+          <p class="note-k">Sommelier&rsquo;s Note</p>
+          <p>You all live somewhere near robotics, perception, and agentic AI &mdash; and four of you said late-night 국밥 is non-negotiable.</p>
+          <p class="sig">— paired by Pull Up</p>
+        </div>
+
+        <div class="featured">
+          <div class="fnum">✦</div>
+          <div class="f-body">
+            <div class="f-top">
+              <span class="f-name">Jang Soo Jang</span>
+              <span class="f-price">$$</span>
+            </div>
+            <p class="f-desc">Korean BBQ &amp; 국밥 &mdash; tonight&rsquo;s featured table.</p>
+            <p class="f-meta">0.4 mi away · meet at <b>7:30 PM</b></p>
+          </div>
+        </div>
+
+        <button class="cta">Open group chat</button>
+
+      </div></div>
+    </div></div></div>
+  </section>
+
+  <!-- ============ 3 · CHAT ============ -->
+  <section class="col">
+    <p class="col-label">3 · Chat</p>
+    <div class="phone"><div class="frame-inner"><div class="screen">
+      <div class="notch"></div>
+
+      <div class="chat-head">
+        <div class="ct"><span class="badge">3</span> Table 3</div>
+        <div class="cs">Day 2 Dinner · Thu 7:30 PM</div>
+      </div>
+
+      <div class="thread">
+        <div class="msg">
+          <p class="who">Yuna Park</p>
+          <div class="bubble">omg finally people who get HCI 😭</div>
+        </div>
+        <div class="msg me">
+          <p class="who">성환</p>
+          <div class="bubble">haha same. down for 국밥 after?</div>
+        </div>
+        <div class="msg">
+          <p class="who">David Kim</p>
+          <div class="bubble">i&rsquo;m so in. never had it</div>
+        </div>
+        <div class="msg">
+          <p class="who">민준</p>
+          <div class="bubble">wait it&rsquo;s David&rsquo;s first 국밥?? this is a big night</div>
+        </div>
+        <div class="msg">
+          <p class="who">지원</p>
+          <div class="bubble">ordering for the table, trust me</div>
+        </div>
+        <div class="msg">
+          <p class="who">Yuna Park</p>
+          <div class="bubble">meeting at the lobby 7:15?</div>
+        </div>
+      </div>
+
+      <div class="composer">
+        <div class="field">Add to the table&hellip;</div>
+        <button class="send" aria-label="Send">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 12l15-7-6 7 6 7-15-7z" fill="#fbf3e6"/></svg>
+        </button>
+      </div>
+
+    </div></div></div>
+  </section>
+
+</div>
