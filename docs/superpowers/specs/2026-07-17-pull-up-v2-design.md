@@ -1,11 +1,14 @@
-# Pull Up v2 — Product & Web-State Plan
+# UKC Social v2 — Product & Web-State Plan
+
+> **Name:** display name is **UKC Social** (decided 2026-07-17; formerly "Pull Up" —
+> repo stays github.com/sunnycho100/pull-up).
 
 - **Date:** 2026-07-17 · **Status:** Draft (awaiting review) · **Supersedes:** 2026-07-15 spec
 - **Event:** UKC 2026 · Omni Orlando Resort at ChampionsGate · Aug 4–8, 2026
 - **Design direction:** #2 Precision (Stripe-white + blurple) + Apple motion/material layer
 - **Repo:** github.com/sunnycho100/pull-up
 
-## 1. What Pull Up Is Now
+## 1. What UKC Social Is Now
 
 A mobile-first conference companion web app (one link + QR). Three pillars:
 
@@ -13,7 +16,7 @@ A mobile-first conference companion web app (one link + QR). Three pillars:
    other attendees. The social graph everything else hangs on.
 2. **Meal matching (the AI core)** — conference meals are out-of-pocket and expensive
    (lunch ~$50; dinners ~$80–130), so many attendees — especially students — skip the
-   official options. Pull Up groups 4–6 people by shared interests per meal slot, with
+   official options. UKC Social groups 4–6 people by shared interests per meal slot, with
    group chat. In-app copy stays positive ("find your table"); never mentions official
    dinner pricing.
 3. **Ride pooling (the $$ saver)** — MCO → ChampionsGate runs $40–70/car. Attendees
