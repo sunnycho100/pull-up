@@ -497,3 +497,54 @@ grant select on directory_profiles to authenticated;
 - Types consistent: `MatchGroup`/`SignupProfile` defined T8, consumed T9; `Chat` props defined T11 for Plan 2 reuse.
 - Blockers: T2 apply + T3 verify need Supabase creds; T9 integration needs `ANTHROPIC_API_KEY`. All other tasks proceed without.
 ```
+
+---
+
+## Delegation — subagent prompts
+
+Each Task above IS a subagent brief. To dispatch one, paste the **shared context block** + the **task's own section** (Files / Interfaces / Steps) into a fresh `claude` subagent. Do not give a subagent more than one task; review between tasks.
+
+### Shared context block (prepend to EVERY task dispatch)
+
+```
+You are implementing ONE task of the UKC Social app (UKC 2026 conference companion).
+Repo: /Users/sunghwan_cho/Documents/projects/ai-build (github sunnycho100/pull-up).
+
+Read these before writing code:
+- docs/superpowers/plans/2026-07-17-ukc-social-core.md  (the plan — find YOUR task)
+- docs/superpowers/specs/2026-07-17-pull-up-v2-design.md (the product spec)
+
+Honor the plan's Global Constraints verbatim: app name "UKC Social"; never mention
+official dinner pricing in copy; Precision design (white ground, navy #0A2540, blurple
+#635BFF) + Apple layer (system font, springs, glass tab bar); a11y (reduced-motion/
+transparency); contacts RLS-locked to groupmates; admin = such4283@gmail.com; Korean
+UTF-8 everywhere; commits short, NO AI-attribution trailer.
+
+Do ONLY <Task N>. Follow its Steps in order — write the failing test first where the
+task is TDD, run it, implement minimally, re-run, commit. Use the exact file paths,
+function names, and type signatures in the task's Interfaces block; other tasks depend
+on those names. Do not touch files outside your task. Do not start the next task.
+
+When done, reply with: files changed, test/verify command output, and the commit hash.
+```
+
+### Per-task dispatch pointers
+
+| Task | One-line brief | Blocked by |
+|---|---|---|
+| T1 Scaffold | create-next-app + deps; dev server renders | — |
+| T2 Schema+RLS | apply `0001_core.sql`; 8 tables, policies, avatar bucket | Supabase creds |
+| T3 Auth | supabase clients + middleware + magic-link login + callback | T1, T2, creds |
+| T4 Shell | tokens + glass TabBar + `(tabs)` layout | T1 |
+| T5 Onboarding | 3-step ≤60s, avatar downscale/upload, `saveProfile` | T3, T4 |
+| T6 Slots+Meals | seed 4 real slots; meals list w/ counts | T2, T4 |
+| T7 Join sheet | bottom sheet, `joinSlot`/`leaveSlot`, optimistic | T6 |
+| T8 Matching | TDD: `validateAssignment`, `roundRobinGroups`, `matchSlot` | T1 |
+| T9 Match run | admin gate, `runMatching`, seed-fake, integration check | T8, T2, `ANTHROPIC_API_KEY` |
+| T10 Reveal | group page, member cards, rationale, spring reveal | T9, T4 |
+| T11 Chat | realtime `<Chat>` (reused for rides in Plan 2) | T10 |
+| T12 Directory+Home | directory view, contact-lock RPC, Home/Me states | T5, T10 |
+
+**Parallelizable now (no creds needed):** T1 → then T4 and T8 can run in parallel.
+Everything else gates on Supabase creds (T2) landing.
+
