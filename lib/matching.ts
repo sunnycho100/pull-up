@@ -2,7 +2,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 export type SignupProfile = { userId: string; name: string; school: string;
-  position: string; interests: string[]; groupSizePref?: number; notes?: string };
+  position: string; interests: string[]; partySize?: number; notes?: string };
 export type MatchGroup = { memberIds: string[]; name: string; rationale: string;
   suggestedPlace: string };
 

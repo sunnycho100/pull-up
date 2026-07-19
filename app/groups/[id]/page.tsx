@@ -13,7 +13,7 @@ export default async function GroupPage({
   // RLS restricts groups/group_members to members — a non-member gets null → 404.
   const { data: group } = await supabase
     .from("groups")
-    .select("id, name, rationale, suggested_place, meet_time, slot:slots(title, starts_at, area)")
+    .select("id, name, rationale, suggested_place, meet_time, slot_id, slot:slots(title, starts_at, area)")
     .eq("id", id)
     .maybeSingle();
   if (!group) notFound();
@@ -23,8 +23,16 @@ export default async function GroupPage({
     .select("user_id, profile:profiles(name, photo_url, school, position, interests, kakao, linkedin)")
     .eq("group_id", id);
 
+  // party_size lives on the slot signup; su_sel lets members read it. Map user → headcount.
+  const { data: sus } = await supabase
+    .from("signups")
+    .select("user_id, party_size")
+    .eq("slot_id", (group as any).slot_id);
+  const sizeById = new Map((sus ?? []).map((s: any) => [s.user_id, s.party_size ?? 1]));
+
   const members = (rows ?? []).map((r: any) => ({
     userId: r.user_id as string,
+    partySize: sizeById.get(r.user_id) ?? 1,
     ...r.profile,
   }));
 

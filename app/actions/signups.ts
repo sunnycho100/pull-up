@@ -6,7 +6,7 @@ type Result = { ok: boolean; error?: string };
 
 export async function joinSlot(
   slotId: string,
-  opts: { groupSizePref?: number; notes?: string },
+  opts: { partySize?: number; notes?: string },
 ): Promise<Result> {
   const { user, supabase } = await requireUser();
 
@@ -20,11 +20,13 @@ export async function joinSlot(
     return { ok: false, error: "closed" };
   }
 
+  // Clamp to the DB check (1-6); default solo.
+  const partySize = Math.min(6, Math.max(1, Math.round(opts.partySize ?? 1)));
   const { error } = await supabase.from("signups").upsert(
     {
       slot_id: slotId,
       user_id: user.id,
-      group_size_pref: opts.groupSizePref ?? null,
+      party_size: partySize,
       notes: opts.notes ?? "",
     },
     { onConflict: "slot_id,user_id" },

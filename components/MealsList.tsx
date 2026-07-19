@@ -11,7 +11,7 @@ export type Slot = {
   area: string;
   join_deadline: string;
 };
-export type Signup = { groupSizePref: number | null; notes: string };
+export type Signup = { partySize: number; notes: string };
 
 const dtf = new Intl.DateTimeFormat("en-US", {
   weekday: "short",
@@ -46,16 +46,17 @@ export default function MealsList({
     setTimeout(() => setToast(null), 2600);
   }
 
-  async function handleJoin(slotId: string, pref: number | undefined, notes: string) {
+  async function handleJoin(slotId: string, partySize: number, notes: string) {
     const prevMine = mine[slotId];
     const prevCount = counts[slotId] ?? 0;
-    const wasJoined = !!prevMine;
+    const prevSize = prevMine?.partySize ?? 0;
 
-    setMine((m) => ({ ...m, [slotId]: { groupSizePref: pref ?? null, notes } }));
-    if (!wasJoined) setCounts((c) => ({ ...c, [slotId]: prevCount + 1 }));
+    setMine((m) => ({ ...m, [slotId]: { partySize, notes } }));
+    // Counts track headcount: adjust by the delta between old and new party size.
+    setCounts((c) => ({ ...c, [slotId]: prevCount - prevSize + partySize }));
     setOpenId(null);
 
-    const res = await joinSlot(slotId, { groupSizePref: pref, notes });
+    const res = await joinSlot(slotId, { partySize, notes });
     if (!res.ok) {
       setMine((m) => ({ ...m, [slotId]: prevMine }));
       setCounts((c) => ({ ...c, [slotId]: prevCount }));
@@ -68,7 +69,7 @@ export default function MealsList({
     const prevCount = counts[slotId] ?? 0;
 
     setMine((m) => ({ ...m, [slotId]: undefined as unknown as Signup }));
-    setCounts((c) => ({ ...c, [slotId]: Math.max(0, prevCount - 1) }));
+    setCounts((c) => ({ ...c, [slotId]: Math.max(0, prevCount - (prevMine?.partySize ?? 1)) }));
     setOpenId(null);
 
     const res = await leaveSlot(slotId);

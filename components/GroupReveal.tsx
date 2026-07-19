@@ -12,6 +12,7 @@ type Member = {
   interests?: string[];
   kakao?: string;
   linkedin?: string;
+  partySize?: number;
 };
 
 const EASE = "cubic-bezier(0.16,1,0.3,1)";
@@ -89,6 +90,9 @@ export default function GroupReveal({
     .filter(Boolean)
     .join(" · ");
 
+  // Real seats at the table: a member who came with friends counts for their whole party.
+  const headcount = members.reduce((n, m) => n + (m.partySize ?? 1), 0);
+
   return (
     <section style={{ padding: "28px 20px 40px", maxWidth: 480, margin: "0 auto" }}>
       <p
@@ -107,7 +111,7 @@ export default function GroupReveal({
       </h1>
       <p style={{ fontSize: 15, color: "var(--ink-2)", margin: "6px 0 0" }}>
         <span style={{ fontWeight: 600, color: "var(--ink)" }}>{name}</span> ·{" "}
-        {members.length} {members.length === 1 ? "person" : "people"}
+        {headcount} {headcount === 1 ? "person" : "people"}
       </p>
 
       <div style={{ display: "grid", gap: 10, marginTop: 24 }}>
@@ -164,7 +168,14 @@ export default function GroupReveal({
             )}
 
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: 15, fontWeight: 600 }}>{m.name}</div>
+              <div style={{ fontSize: 15, fontWeight: 600 }}>
+                {m.name}
+                {(m.partySize ?? 1) > 1 && (
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--accent)", marginLeft: 6 }}>
+                    +{(m.partySize ?? 1) - 1} with them
+                  </span>
+                )}
+              </div>
               {(m.school || m.position) && (
                 <div style={{ fontSize: 13, color: "var(--ink-2)", marginTop: 1 }}>
                   {[m.school, m.position].filter(Boolean).join(" · ")}
@@ -199,16 +210,13 @@ export default function GroupReveal({
               )}
 
               {(m.kakao || m.linkedin) && (
-                <div style={{ display: "flex", gap: 14, marginTop: 8 }}>
+                <div style={{ display: "flex", gap: 14, marginTop: 8, alignItems: "baseline" }}>
                   {m.kakao && (
-                    <a
-                      href={m.kakao}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ fontSize: 12, fontWeight: 600, color: "var(--accent)" }}
-                    >
-                      KakaoTalk
-                    </a>
+                    // Kakao is a plain ID, not a URL — show as copyable text, not a link.
+                    <span style={{ fontSize: 12, color: "var(--ink-2)" }}>
+                      Kakao{" "}
+                      <span style={{ fontWeight: 600, color: "var(--ink)" }}>{m.kakao}</span>
+                    </span>
                   )}
                   {m.linkedin && (
                     <a

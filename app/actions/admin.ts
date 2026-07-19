@@ -39,7 +39,7 @@ export async function runMatching(slotId: string): Promise<Result> {
 
   const { data: rows, error: sErr } = await svc
     .from("signups")
-    .select("user_id, group_size_pref, notes, profiles(name, school, position, interests)")
+    .select("user_id, party_size, notes, profiles(name, school, position, interests)")
     .eq("slot_id", slotId);
   if (sErr) return { ok: false, error: sErr.message };
 
@@ -52,7 +52,7 @@ export async function runMatching(slotId: string): Promise<Result> {
       school: (p.school as string) ?? "",
       position: (p.position as string) ?? "",
       interests: (p.interests as string[]) ?? [],
-      groupSizePref: (r.group_size_pref as number | null) ?? undefined,
+      partySize: (r.party_size as number | null) ?? 1,
       notes: (r.notes as string) ?? "",
     };
   });
@@ -92,6 +92,10 @@ export async function runMatching(slotId: string): Promise<Result> {
   const { error: mErr } = await svc.from("group_members").insert(members);
   if (mErr) return { ok: false, error: mErr.message };
 
-  const flex = groups.length > 0 && Math.min(...groups.map((g) => g.memberIds.length)) < 4;
+  // Flex = some table seats fewer than 4 by headcount (an unavoidable small table).
+  const sizes = new Map(signups.map((s) => [s.userId, s.partySize ?? 1]));
+  const headcount = (ids: string[]) => ids.reduce((n, id) => n + (sizes.get(id) ?? 1), 0);
+  const flex =
+    groups.length > 0 && Math.min(...groups.map((g) => headcount(g.memberIds))) < 4;
   return { ok: true, groups: groups.length, flex };
 }

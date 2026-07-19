@@ -12,14 +12,15 @@ export default async function MealsPage() {
 
   const { data: signups } = await supabase
     .from("signups")
-    .select("slot_id, user_id, group_size_pref, notes");
+    .select("slot_id, user_id, party_size, notes");
 
+  // "N people in" counts real seats: a party of 3 counts as 3.
   const counts: Record<string, number> = {};
-  const mine: Record<string, { groupSizePref: number | null; notes: string }> = {};
+  const mine: Record<string, { partySize: number; notes: string }> = {};
   for (const s of signups ?? []) {
-    counts[s.slot_id] = (counts[s.slot_id] ?? 0) + 1;
+    counts[s.slot_id] = (counts[s.slot_id] ?? 0) + (s.party_size ?? 1);
     if (s.user_id === user.id) {
-      mine[s.slot_id] = { groupSizePref: s.group_size_pref, notes: s.notes ?? "" };
+      mine[s.slot_id] = { partySize: s.party_size ?? 1, notes: s.notes ?? "" };
     }
   }
 

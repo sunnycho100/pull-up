@@ -12,11 +12,11 @@ const dtf = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/New_York",
 });
 
-const SIZES: { label: string; val: number | undefined }[] = [
-  { label: "4", val: 4 },
-  { label: "5", val: 5 },
-  { label: "6", val: 6 },
-  { label: "Any", val: undefined },
+const PARTY: { label: string; val: number }[] = [
+  { label: "Just me", val: 1 },
+  { label: "+1", val: 2 },
+  { label: "+2", val: 3 },
+  { label: "+3", val: 4 },
 ];
 
 export default function JoinSheet({
@@ -33,10 +33,10 @@ export default function JoinSheet({
   signup?: Signup;
   closed: boolean;
   onClose: () => void;
-  onJoin: (slotId: string, pref: number | undefined, notes: string) => void;
+  onJoin: (slotId: string, partySize: number, notes: string) => void;
   onLeave: (slotId: string) => void;
 }) {
-  const [pref, setPref] = useState<number | undefined>(signup?.groupSizePref ?? undefined);
+  const [partySize, setPartySize] = useState<number>(signup?.partySize ?? 1);
   const [notes, setNotes] = useState(signup?.notes ?? "");
 
   return (
@@ -61,23 +61,28 @@ export default function JoinSheet({
           </p>
         ) : (
           <>
-            <label className="field-label">Table size</label>
-            <div className="seg" role="group" aria-label="Preferred table size">
-              {SIZES.map((s) => {
-                const selected = pref === s.val;
+            <label className="field-label">How many are you, including yourself?</label>
+            <div className="seg" role="group" aria-label="How many in your party">
+              {PARTY.map((s) => {
+                const selected = partySize === s.val;
                 return (
                   <button
                     key={s.label}
                     type="button"
                     className={`seg__opt${selected ? " seg__opt--on" : ""}`}
                     aria-pressed={selected}
-                    onClick={() => setPref(s.val)}
+                    onClick={() => setPartySize(s.val)}
                   >
                     {s.label}
                   </button>
                 );
               })}
             </div>
+            <p className="party-hint">
+              {partySize > 1
+                ? `We'll seat your group of ${partySize} together with another small group.`
+                : "Come solo — we'll seat you with people worth meeting."}
+            </p>
 
             <label className="field-label" htmlFor="join-notes" style={{ marginTop: 20 }}>
               Notes
@@ -91,7 +96,7 @@ export default function JoinSheet({
               placeholder="Anything your table should know? (optional)"
             />
 
-            <button className="btn-primary" onClick={() => onJoin(slot.id, pref, notes)}>
+            <button className="btn-primary" onClick={() => onJoin(slot.id, partySize, notes)}>
               {joined ? "Save changes" : "Join"}
             </button>
 
@@ -164,6 +169,12 @@ export default function JoinSheet({
         .seg__opt--on {
           background: var(--accent);
           color: var(--accent-ink);
+        }
+        .party-hint {
+          font-size: 13px;
+          color: var(--ink-2);
+          margin: 10px 2px 0;
+          line-height: 1.4;
         }
         .notes {
           width: 100%;
