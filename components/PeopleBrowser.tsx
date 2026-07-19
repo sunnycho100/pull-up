@@ -82,9 +82,16 @@ export default function PeopleBrowser({
 
   if (people.length === 0) {
     return (
-      <div style={{ padding: "48px 0", textAlign: "center" }}>
-        <div style={{ fontSize: 32 }}>👋</div>
-        <p style={{ fontSize: 17, fontWeight: 600, marginTop: 12 }}>You&apos;re early</p>
+      <div style={{ padding: "40px 0", textAlign: "center" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/empty-people.svg"
+          alt=""
+          width={140}
+          height={105}
+          style={{ display: "block", margin: "0 auto" }}
+        />
+        <p style={{ fontSize: 17, fontWeight: 600, marginTop: 16 }}>You&apos;re early</p>
         <p style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 6, lineHeight: 1.5 }}>
           No one else has set up a profile yet. Check back soon — this fills up as
           people arrive for UKC 2026.

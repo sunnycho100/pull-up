@@ -1,0 +1,14 @@
+<svg width="200" height="150" viewBox="0 0 200 150" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two people meeting at a table">
+  <!-- shoulders (behind heads and table) -->
+  <path d="M50 104 a22 24 0 0 1 44 0" fill="#ffffff" stroke="#0a2540" stroke-width="3" stroke-linecap="round"/>
+  <path d="M106 104 a22 24 0 0 1 44 0" fill="#ffffff" stroke="#0a2540" stroke-width="3" stroke-linecap="round"/>
+  <!-- heads -->
+  <circle cx="72" cy="54" r="15" fill="#ffffff" stroke="#0a2540" stroke-width="3"/>
+  <circle cx="128" cy="54" r="15" fill="#ffffff" stroke="#0a2540" stroke-width="3"/>
+  <!-- table front edge (in front of lower bodies) -->
+  <ellipse cx="100" cy="118" rx="60" ry="13" fill="#f7f8fa" stroke="#0a2540" stroke-width="2.5"/>
+  <!-- connection spark: blurple dots echoing the logo's "o" -->
+  <circle cx="100" cy="26" r="4.5" fill="#635bff"/>
+  <circle cx="89" cy="34" r="3" fill="#635bff"/>
+  <circle cx="111" cy="34" r="3" fill="#635bff"/>
+</svg>
