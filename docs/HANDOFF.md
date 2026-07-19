@@ -13,6 +13,11 @@ _Last updated: 2026-07-19 (autonomous build + live QA run; + feature/polish run)
   unified error reds, teaching Rides placeholder.
 - **Repo cleanup**: removed `CLAUDE.md`/`AGENTS.md` (Next.js note folded into README),
   rewrote README with setup + user state-flow.
+- **Rides (started)**: `lib/flights.ts` — `fetchArrivals()` uses AeroDataBox (RapidAPI,
+  set `AERODATABOX_API_KEY`) or the bundled Aug-4 MCO example; `bucketIntoPools()` groups
+  arrivals by revised time so delays re-pool correctly. The Rides tab now renders the
+  example pools with delay badges + car-split estimate. Next: join/leave a pool (ride_pools
+  tables already exist) + persist onboarding flight info.
 
 ## Status: BUILT + VERIFIED END-TO-END on cloud Supabase ✅
 
@@ -63,7 +68,8 @@ _Not done yet — this is the runbook for when we deploy. Do NOT deploy silently
 1. **Import the repo** into Vercel (framework auto-detects as Next.js).
 2. **Set env vars** in Vercel → Project → Settings → Environment Variables (Production +
    Preview): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-   `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `ADMIN_EMAIL`. Values mirror `.env.local`.
+   `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `ADMIN_EMAIL`, and optionally
+   `AERODATABOX_API_KEY` (live Rides arrivals). Values mirror `.env.local`.
    The service-role key is server-only — never expose it as `NEXT_PUBLIC_*`.
 3. **Deploy**, note the assigned domain (e.g. `ukc-social.vercel.app`).
 4. **Point Supabase auth at the domain:** Supabase → Auth → URL Configuration →
