@@ -39,6 +39,7 @@ solo or as a pre-formed group. Contacts unlock only for people you actually shar
 | `SUPABASE_SERVICE_ROLE_KEY` | Service-role key — admin matching only, server-side |
 | `ANTHROPIC_API_KEY` | Meal matching. Without it, matching uses the round-robin fallback |
 | `ADMIN_EMAIL` | The one email allowed to run matching at `/admin` |
+| `AERODATABOX_API_KEY` | Optional. Live airport arrivals on Rides (AeroDataBox via RapidAPI). Without it, Rides shows the bundled Aug-4 MCO example |
 
 ## Database
 
