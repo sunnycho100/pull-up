@@ -115,7 +115,9 @@ function Fresh({ name }: { name: string }) {
   const greeting = name.trim() ? `Hey ${firstName(name)}` : "Welcome";
   return (
     <div>
-      <h1 style={{ fontSize: 26, fontWeight: 700 }}>{greeting} 👋</h1>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/mascot.png" alt="" width={84} height={96} style={{ display: "block", marginBottom: 4 }} />
+      <h1 style={{ fontSize: 26, fontWeight: 700 }}>{greeting}</h1>
       <p style={{ color: "var(--ink-2)", marginTop: 8, fontSize: 15 }}>
         Nothing on your plate yet. Let&apos;s find your people for tonight.
       </p>
