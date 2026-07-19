@@ -118,7 +118,7 @@ export default function JoinSheet({
           position: fixed;
           inset: 0;
           z-index: 100;
-          background: rgba(10, 37, 64, 0.35);
+          background: var(--overlay);
           display: flex;
           align-items: flex-end;
           animation: sheet-fade 200ms ease-out;

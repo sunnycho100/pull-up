@@ -59,13 +59,17 @@ export async function runMatching(slotId: string): Promise<Result> {
 
   if (signups.length === 0) return { ok: true, groups: 0 };
 
+  const sizes = new Map(signups.map((s) => [s.userId, s.partySize ?? 1]));
+  const headcount = (ids: string[]) => ids.reduce((n, id) => n + (sizes.get(id) ?? 1), 0);
+
   let groups: MatchGroup[];
   try {
     groups = await matchSlot(signups);
   } catch {
     groups = roundRobinGroups(signups); // ponytail: falls back on missing ANTHROPIC_API_KEY
   }
-  if (!validateAssignment(signups.map((s) => s.userId), groups).ok)
+  // Validate by headcount (a party of 3 weighs 3), matching matchSlot's own check.
+  if (!validateAssignment(signups.map((s) => s.userId), groups, 4, 6, sizes).ok)
     groups = roundRobinGroups(signups);
 
   // Idempotent: wipe prior groups for this slot (cascade drops group_members).
@@ -93,8 +97,6 @@ export async function runMatching(slotId: string): Promise<Result> {
   if (mErr) return { ok: false, error: mErr.message };
 
   // Flex = some table seats fewer than 4 by headcount (an unavoidable small table).
-  const sizes = new Map(signups.map((s) => [s.userId, s.partySize ?? 1]));
-  const headcount = (ids: string[]) => ids.reduce((n, id) => n + (sizes.get(id) ?? 1), 0);
   const flex =
     groups.length > 0 && Math.min(...groups.map((g) => headcount(g.memberIds))) < 4;
   return { ok: true, groups: groups.length, flex };

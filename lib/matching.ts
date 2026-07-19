@@ -38,7 +38,10 @@ export function roundRobinGroups(signups: SignupProfile[], target = 5): MatchGro
     .map(s => ({ id: s.userId, size: s.partySize ?? 1 }))
     .sort((a, b) => b.size - a.size);
   const total = atoms.reduce((n, a) => n + a.size, 0);
-  const binCount = Math.max(1, Math.round(total / target));
+  // Balance toward `target` per table, but never provision fewer bins than are needed
+  // to fit everyone under `max` — else e.g. 7 solos round to 1 bin and spill to 6+1
+  // instead of a balanced 4+3.
+  const binCount = Math.max(1, Math.round(total / target), Math.ceil(total / max));
   const bins: { ids: string[]; load: number }[] =
     Array.from({ length: binCount }, () => ({ ids: [], load: 0 }));
 

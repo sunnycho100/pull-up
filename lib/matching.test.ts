@@ -97,6 +97,18 @@ describe("roundRobinGroups — party headcount", () => {
     expect(headcount(gs[0].memberIds, sizeMap(sizes))).toBe(6);
   });
 
+  it("balances 7 solo diners into 4+3, not a lone diner (6+1)", () => {
+    const sizes = Array(7).fill(1);
+    const gs = roundRobinGroups(parties(sizes));
+    const sm = sizeMap(sizes);
+    expect(gs.length).toBe(2);
+    for (const g of gs) {
+      const h = headcount(g.memberIds, sm);
+      expect(h).toBeLessThanOrEqual(6);
+      expect(h).toBeGreaterThanOrEqual(3); // no lone diner
+    }
+  });
+
   it("never exceeds max headcount and seats everyone exactly once (mixed)", () => {
     const sizes = [1, 2, 3, 4, 1, 2, 3, 1, 2, 5, 1];
     const gs = roundRobinGroups(parties(sizes));
