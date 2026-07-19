@@ -39,10 +39,9 @@ export default function LoginPage() {
         margin: "0 auto",
       }}
     >
-      <h1 style={{ fontSize: 34, fontWeight: 700, letterSpacing: "-0.02em" }}>
-        UKC Social
-      </h1>
-      <p style={{ color: "var(--ink-2)", marginTop: 6, fontSize: 16 }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logo.png" alt="UKC Social" height={40} width={93} style={{ display: "block" }} />
+      <p style={{ color: "var(--ink-2)", marginTop: 12, fontSize: 16 }}>
         Find your table at UKC 2026 — dinners, rides, and people worth meeting.
       </p>
 
