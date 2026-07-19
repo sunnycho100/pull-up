@@ -211,7 +211,7 @@ export default function JoinSheet({
           margin-top: 8px;
           border: none;
           background: transparent;
-          color: #b42318;
+          color: var(--danger);
           font-size: 15px;
           font-weight: 500;
           padding: 12px;

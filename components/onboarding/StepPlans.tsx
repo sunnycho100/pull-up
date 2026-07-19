@@ -178,7 +178,7 @@ export default function StepPlans({
       </div>
 
       {error && (
-        <p style={{ color: "#b42318", fontSize: 14, marginTop: 16 }}>{error}</p>
+        <p style={{ color: "var(--danger)", fontSize: 14, marginTop: 16 }}>{error}</p>
       )}
 
       <div style={{ display: "flex", gap: 12, marginTop: 28 }}>

@@ -94,7 +94,21 @@ export default function GroupReveal({
   const headcount = members.reduce((n, m) => n + (m.partySize ?? 1), 0);
 
   return (
-    <section style={{ padding: "28px 20px 40px", maxWidth: 480, margin: "0 auto" }}>
+    <section style={{ padding: "20px 20px 40px", maxWidth: 480, margin: "0 auto" }}>
+      <Link
+        href="/home"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 4,
+          fontSize: 14,
+          fontWeight: 600,
+          color: "var(--ink-2)",
+          marginBottom: 16,
+        }}
+      >
+        ‹ Home
+      </Link>
       <p
         style={{
           fontSize: 12,

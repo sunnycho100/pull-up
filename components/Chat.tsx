@@ -270,7 +270,7 @@ export default function Chat({
                       marginTop: 3,
                       fontSize: 11.5,
                       fontWeight: 600,
-                      color: "#d64545",
+                      color: "var(--danger)",
                       background: "none",
                       border: "none",
                       padding: "0 4px",

@@ -235,7 +235,7 @@ export default function ProfileEditor({
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleFile} />
       </div>
       {upload === "error" && (
-        <p style={{ textAlign: "center", fontSize: 13, color: "#b42318", marginBottom: 8 }}>
+        <p style={{ textAlign: "center", fontSize: 13, color: "var(--danger)", marginBottom: 8 }}>
           Upload failed —{" "}
           <button
             type="button"
@@ -301,7 +301,7 @@ export default function ProfileEditor({
         placeholder="Vegetarian, halal, allergies…"
       />
 
-      {error && <p style={{ color: "#b42318", fontSize: 14, marginTop: 16 }}>{error}</p>}
+      {error && <p style={{ color: "var(--danger)", fontSize: 14, marginTop: 16 }}>{error}</p>}
 
       <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
         <button

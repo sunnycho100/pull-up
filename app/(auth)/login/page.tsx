@@ -88,7 +88,7 @@ export default function LoginPage() {
             }}
           />
           {phase === "error" && (
-            <p style={{ color: "#b3261e", fontSize: 13, marginTop: 8 }}>
+            <p style={{ color: "var(--danger)", fontSize: 13, marginTop: 8 }}>
               Couldn&apos;t send the link — {errorMsg}. Try again.
             </p>
           )}
