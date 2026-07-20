@@ -2,10 +2,17 @@
 
 import { useState } from "react";
 
+// Ordered broad → specific → social, so the first chips are easy general buckets
+// and the niche ones sit lower for people who want them.
 const SEED = [
-  "Robotics", "Perception", "NLP / Agents", "Computer Vision", "HCI", "RL",
-  "Bioengineering", "Materials", "Energy", "Semiconductors", "Quant / Finance",
-  "Startups", "국밥 crew", "Night owl", "Coffee chat", "K-drama", "Golf", "Runners",
+  // Broad fields
+  "AI / ML", "Robotics", "Biology / Health", "Engineering", "Physics / Materials",
+  "Data / Quant", "Software", "Design / HCI", "Startups",
+  // More specific
+  "Computer Vision", "NLP / Agents", "RL", "Perception", "Bioengineering",
+  "Neuroscience", "Semiconductors", "Energy",
+  // For fun
+  "국밥 crew", "Coffee chat", "Night owl", "K-drama", "Golf", "Runners",
 ];
 
 export default function StepInterests({

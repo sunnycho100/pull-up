@@ -216,7 +216,7 @@ export default function Chat({
               textAlign: "center",
             }}
           >
-            Say hi and suggest a meet spot 👋
+            Say hi and share who you are 👋
           </div>
         ) : (
           messages.map((m, i) => {

@@ -8,7 +8,7 @@ export default async function GroupPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase } = await requireUser();
+  const { user, supabase } = await requireUser();
 
   // RLS restricts groups/group_members to members — a non-member gets null → 404.
   const { data: group } = await supabase
@@ -51,6 +51,7 @@ export default async function GroupPage({
       slotStartsAt={slot?.starts_at ?? null}
       slotArea={slot?.area ?? ""}
       members={members}
+      meId={user.id}
     />
   );
 }

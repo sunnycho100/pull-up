@@ -18,13 +18,6 @@ type Member = {
 const EASE = "cubic-bezier(0.16,1,0.3,1)";
 const TZ = "America/New_York";
 
-function initials(name?: string) {
-  const n = (name ?? "").trim();
-  if (!n) return "?";
-  const parts = n.split(/\s+/);
-  return (parts[0][0] + (parts[1]?.[0] ?? "")).toUpperCase();
-}
-
 function fmtContext(startsAt: string | null, area: string) {
   if (!startsAt) return area;
   const d = new Date(startsAt);
@@ -57,6 +50,7 @@ export default function GroupReveal({
   slotStartsAt,
   slotArea,
   members,
+  meId,
 }: {
   groupId: string;
   name: string;
@@ -67,7 +61,11 @@ export default function GroupReveal({
   slotStartsAt: string | null;
   slotArea: string;
   members: Member[];
+  meId?: string;
 }) {
+  const myInterests = new Set(
+    (members.find((m) => m.userId === meId)?.interests ?? []).map((x) => x.toLowerCase()),
+  );
   // First-visit-only reveal: cards spring-stagger in. Repeat visits and
   // reduced-motion render instantly (no transition).
   const [visible, setVisible] = useState(false);
@@ -140,89 +138,48 @@ export default function GroupReveal({
               padding: "16px 0",
               borderTop: "1px solid var(--line)",
               opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(12px)",
+              transform: visible ? "translateY(0)" : "translateY(16px)",
               transition: animate
-                ? `opacity 400ms ${EASE} ${i * 60}ms, transform 400ms ${EASE} ${i * 60}ms`
+                ? `opacity 560ms ${EASE} ${i * 110}ms, transform 560ms ${EASE} ${i * 110}ms`
                 : "none",
             }}
           >
-            {m.photo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={m.photo_url}
-                alt={m.name ?? ""}
-                width={44}
-                height={44}
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  flexShrink: 0,
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: "50%",
-                  flexShrink: 0,
-                  background: "var(--surface)",
-                  border: "1px solid var(--line)",
-                  color: "var(--ink-2)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 15,
-                  fontWeight: 600,
-                }}
-              >
-                {initials(m.name)}
-              </div>
-            )}
-
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: 16, fontWeight: 700 }}>
-                {m.name}
-                {(m.partySize ?? 1) > 1 && (
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--accent)", marginLeft: 6 }}>
-                    +{(m.partySize ?? 1) - 1} with them
-                  </span>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+                <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "var(--font-display)", letterSpacing: "-0.01em" }}>
+                  {m.name}
+                  {m.userId === meId && (
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginLeft: 8 }}>
+                      you
+                    </span>
+                  )}
+                  {(m.partySize ?? 1) > 1 && (
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--accent)", marginLeft: 6 }}>
+                      +{(m.partySize ?? 1) - 1} with them
+                    </span>
+                  )}
+                </div>
+                {m.position && (
+                  <span style={{ flexShrink: 0, fontSize: 13, color: "var(--ink-3)" }}>{m.position}</span>
                 )}
               </div>
-              {(m.school || m.position) && (
-                <div style={{ fontSize: 13, color: "var(--ink-2)", marginTop: 1 }}>
-                  {[m.school, m.position].filter(Boolean).join(" · ")}
-                </div>
+              {m.school && (
+                <div style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 5 }}>{m.school}</div>
               )}
 
-              {m.interests && m.interests.length > 0 && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 5,
-                    marginTop: 8,
-                  }}
-                >
-                  {m.interests.map((it) => (
-                    <span
-                      key={it}
-                      style={{
-                        fontSize: 11,
-                        color: "var(--ink-2)",
-                        background: "var(--bg)",
-                        border: "1px solid var(--line)",
-                        borderRadius: 999,
-                        padding: "2px 8px",
-                      }}
-                    >
-                      {it}
-                    </span>
-                  ))}
-                </div>
-              )}
+              {m.userId !== meId && m.interests && m.interests.length > 0 && (() => {
+                const shared = m.interests.filter((it) => myInterests.has(it.toLowerCase()));
+                return shared.length > 0 ? (
+                  <div style={{ fontSize: 14, marginTop: 8 }}>
+                    <span style={{ color: "var(--ink-3)" }}>you both like </span>
+                    <span style={{ color: "var(--accent)", fontWeight: 600 }}>{shared.join(", ")}</span>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 14, color: "var(--ink-3)", marginTop: 8 }}>
+                    into {m.interests.join(", ")}
+                  </div>
+                );
+              })()}
 
               {(m.kakao || m.linkedin) && (
                 <div style={{ display: "flex", gap: 14, marginTop: 8, alignItems: "baseline" }}>

@@ -85,6 +85,16 @@ export default async function HomePage() {
       .filter((s) => ms(s.starts_at) >= now)
       .sort((a, b) => ms(a.starts_at) - ms(b.starts_at))[0] ?? null;
 
+  // How many have signed up for the slot you're waiting on (for the waiting-state momentum).
+  let waitingCount = 0;
+  if (nextSignup) {
+    const { count } = await supabase
+      .from("signups")
+      .select("*", { count: "exact", head: true })
+      .eq("slot_id", nextSignup.id);
+    waitingCount = count ?? 0;
+  }
+
   const dayOf = nextGroup && ms(nextGroup.slot!.starts_at) - now <= 3 * HOUR;
 
   return (
@@ -102,7 +112,7 @@ export default async function HomePage() {
       ) : nextGroup ? (
         <Revealed group={nextGroup} names={memberNames} />
       ) : nextSignup ? (
-        <JoinedWaiting slot={nextSignup} />
+        <JoinedWaiting slot={nextSignup} count={waitingCount} />
       ) : (
         <Fresh name={profile.name} />
       )}
@@ -115,10 +125,11 @@ function Fresh({ name }: { name: string }) {
   const greeting = name.trim() ? `Hey ${firstName(name)}` : "Welcome";
   return (
     <div>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/mascot.png" alt="" width={84} height={96} style={{ display: "block", marginBottom: 4 }} />
-      <h1 style={{ fontSize: 26, fontWeight: 700 }}>{greeting}</h1>
-      <p style={{ color: "var(--ink-2)", marginTop: 8, fontSize: 15 }}>
+      <div className="eyebrow">UKC 2026</div>
+      <h1 style={{ fontSize: 40, fontWeight: 800, letterSpacing: "-0.03em", marginTop: 10, lineHeight: 1 }}>
+        {greeting}
+      </h1>
+      <p style={{ color: "var(--ink-2)", marginTop: 12, fontSize: 15 }}>
         Nothing on your plate yet. Let&apos;s find your people for tonight.
       </p>
       <div style={{ marginTop: 24, borderBottom: "1px solid var(--line)" }}>
@@ -149,7 +160,7 @@ function CtaCard({ href, title, sub }: { href: string; title: string; sub: strin
   );
 }
 
-function JoinedWaiting({ slot }: { slot: Slot }) {
+function JoinedWaiting({ slot, count }: { slot: Slot; count: number }) {
   return (
     <div>
       <div className="eyebrow">You&apos;re in</div>
@@ -160,7 +171,26 @@ function JoinedWaiting({ slot }: { slot: Slot }) {
         {timeFmt.format(new Date(slot.starts_at))}
         {slot.area ? ` · ${slot.area}` : ""}
       </p>
-      <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--line)" }}>
+
+      {count > 0 && (
+        <div style={{ marginTop: 24 }}>
+          {/* Anonymized: momentum without exposing who joined. */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+            {Array.from({ length: Math.min(count, 14) }).map((_, i) => (
+              <span key={i} style={{ width: 9, height: 9, borderRadius: 999, background: "var(--ink-3)" }} />
+            ))}
+            {count > 14 && (
+              <span style={{ fontSize: 12, color: "var(--ink-3)", marginLeft: 2 }}>+{count - 14}</span>
+            )}
+          </div>
+          <div style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 10 }}>
+            <strong style={{ color: "var(--ink)" }}>{count}</strong>{" "}
+            {count === 1 ? "person is" : "people are"} in so far.
+          </div>
+        </div>
+      )}
+
+      <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid var(--line)" }}>
         <div style={{ fontSize: 15, color: "var(--ink)" }}>
           Tables assigned at{" "}
           <strong>{timeFmt.format(new Date(slot.join_deadline))}</strong>
