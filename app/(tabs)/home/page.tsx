@@ -125,7 +125,7 @@ function Fresh({ name }: { name: string }) {
         <CtaCard
           href="/meals"
           title="Find your table"
-          sub="Join a dinner and get matched by interests — come solo or bring your crew."
+          sub="Join a dinner and get matched by interests. Come solo or bring your crew."
         />
         <CtaCard
           href="/people"

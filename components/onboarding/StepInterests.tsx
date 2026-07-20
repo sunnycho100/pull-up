@@ -41,7 +41,7 @@ export default function StepInterests({
     <>
       <h1 style={{ fontSize: 28, fontWeight: 700 }}>What are you into?</h1>
       <p style={{ color: "var(--ink-2)", marginTop: 6, fontSize: 15 }}>
-        Pick a few — we&apos;ll use these to seat you.{" "}
+        Pick a few. We&apos;ll use these to seat you.{" "}
         <span style={{ color: enough ? "var(--ink-2)" : "var(--accent)", fontWeight: 600 }}>
           {enough ? `${value.length} selected` : "3+ to continue"}
         </span>
@@ -83,7 +83,7 @@ export default function StepInterests({
         <input
           value={custom}
           onChange={(e) => setCustom(e.target.value)}
-          placeholder="Add your own — press Enter"
+          placeholder="Add your own, press Enter"
           style={{
             width: "100%",
             padding: "12px 14px",

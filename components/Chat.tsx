@@ -216,7 +216,7 @@ export default function Chat({
               textAlign: "center",
             }}
           >
-            Say hi — suggest a meet spot 👋
+            Say hi and suggest a meet spot 👋
           </div>
         ) : (
           messages.map((m, i) => {
@@ -277,7 +277,7 @@ export default function Chat({
                       cursor: "pointer",
                     }}
                   >
-                    Failed — retry
+                    Failed. Retry
                   </button>
                 )}
               </div>

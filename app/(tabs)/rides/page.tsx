@@ -1,4 +1,5 @@
 import ridersData from "@/data/example-riders.json";
+import { RiderCard } from "./RiderCard";
 
 type Rider = {
   id: string;
@@ -27,7 +28,7 @@ export default async function RidesPage() {
       <header style={{ marginBottom: 6 }}>
         <h1 style={{ fontSize: 28, fontWeight: 600 }}>Rides</h1>
         <p style={{ color: "var(--ink-2)", marginTop: 6, fontSize: 15 }}>
-          See who&apos;s landing at MCO around your time — start a group and split the car.
+          See who&apos;s landing at MCO near your arrival, then share a car.
         </p>
       </header>
 
@@ -35,35 +36,16 @@ export default async function RidesPage() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 16 }}>
         {riders.map((r) => (
-          <RiderCard key={r.id} r={r} />
+          <RiderCard
+            key={r.id}
+            name={r.name}
+            detail={`${r.name} · ${r.originCity} → MCO · lands around ${fmt(r.arrivalLocal)}`}
+          />
         ))}
       </div>
 
       <RidesStyles />
     </section>
-  );
-}
-
-function RiderCard({ r }: { r: Rider }) {
-  return (
-    <div className="rider">
-      <div className="rider-top">
-        <div className="rider-avatar">{r.name[0]}</div>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div className="rider-name">{r.name}</div>
-          <div className="rider-flight">
-            {r.originCity} → MCO · {r.airline} {r.flightNumber}
-          </div>
-        </div>
-        <div className="rider-time">{fmt(r.arrivalLocal)}</div>
-      </div>
-      <div className="rider-cta">
-        <span>{r.name} is looking for a ride around {fmt(r.arrivalLocal)}</span>
-        <button className="rider-join" type="button">
-          Add to group
-        </button>
-      </div>
-    </div>
   );
 }
 
@@ -78,31 +60,28 @@ function RidesStyles() {
         text-transform: uppercase;
       }
       .rider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
         border: 1px solid var(--line);
         border-radius: 16px;
         padding: 14px 16px;
         background: var(--surface);
       }
-      .rider-top {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-      .rider-avatar {
-        width: 40px;
-        height: 40px;
+      .rider-glyph {
+        width: 38px;
+        height: 38px;
         flex-shrink: 0;
-        border-radius: 999px;
-        background: var(--accent);
-        color: #fff;
+        border-radius: 12px;
+        background: color-mix(in srgb, var(--accent) 12%, transparent);
+        color: var(--accent);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700;
-        font-size: 17px;
       }
-      .rider-name { font-size: 16px; font-weight: 700; color: var(--ink); }
-      .rider-flight {
+      .rider-body { min-width: 0; flex: 1; }
+      .rider-lead { font-size: 15px; font-weight: 700; color: var(--ink); }
+      .rider-detail {
         font-size: 13px;
         color: var(--ink-2);
         margin-top: 2px;
@@ -110,33 +89,23 @@ function RidesStyles() {
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .rider-time {
-        font-size: 15px;
-        font-weight: 600;
-        color: var(--ink);
-        font-variant-numeric: tabular-nums;
-        flex-shrink: 0;
-      }
-      .rider-cta {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 1px solid var(--line);
-      }
-      .rider-cta > span { font-size: 13px; color: var(--ink-2); }
-      .rider-join {
+      .rider-btn {
         flex-shrink: 0;
         border: none;
         border-radius: 999px;
-        padding: 8px 16px;
+        padding: 9px 16px;
         background: var(--accent);
-        color: #fff;
+        color: var(--accent-ink);
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+      }
+      .rider-btn:hover { background: color-mix(in srgb, var(--accent) 88%, #000); }
+      .rider-btn.is-sent {
+        background: color-mix(in srgb, var(--accent) 12%, transparent);
+        color: var(--accent);
+        cursor: default;
       }
     `}</style>
   );

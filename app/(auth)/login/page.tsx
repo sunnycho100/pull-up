@@ -42,7 +42,7 @@ export default function LoginPage() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/logo.png" alt="UKC Social" height={80} width={186} style={{ display: "block" }} />
       <p style={{ color: "var(--ink-2)", marginTop: 12, fontSize: 16 }}>
-        Find your table at UKC 2026 — dinners, rides, and people worth meeting.
+        Find your table at UKC 2026: dinners, rides, and people worth meeting.
       </p>
 
       {phase === "sent" ? (
@@ -89,7 +89,7 @@ export default function LoginPage() {
           />
           {phase === "error" && (
             <p style={{ color: "var(--danger)", fontSize: 13, marginTop: 8 }}>
-              Couldn&apos;t send the link — {errorMsg}. Try again.
+              Couldn&apos;t send the link. {errorMsg}. Try again.
             </p>
           )}
           <button

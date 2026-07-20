@@ -81,7 +81,7 @@ export default function JoinSheet({
             <p className="party-hint">
               {partySize > 1
                 ? `We'll seat your group of ${partySize} together with another small group.`
-                : "Come solo — we'll seat you with people worth meeting."}
+                : "Come solo. We'll seat you with people worth meeting."}
             </p>
 
             <label className="field-label" htmlFor="join-notes" style={{ marginTop: 20 }}>

@@ -93,7 +93,7 @@ export default function PeopleBrowser({
         />
         <p style={{ fontSize: 17, fontWeight: 600, marginTop: 16 }}>You&apos;re early</p>
         <p style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 6, lineHeight: 1.5 }}>
-          No one else has set up a profile yet. Check back soon — this fills up as
+          No one else has set up a profile yet. Check back soon. This fills up as
           people arrive for UKC 2026.
         </p>
       </div>
@@ -168,7 +168,7 @@ export default function PeopleBrowser({
       {filtered.length === 0 ? (
         <div style={{ padding: "40px 0", textAlign: "center" }}>
           <p style={{ color: "var(--ink-2)", fontSize: 15 }}>
-            No one matches — clear filters
+            No one matches. Clear filters
           </p>
           <button
             type="button"
@@ -219,7 +219,7 @@ export default function PeopleBrowser({
                   }}
                 >
                   {[person.school, person.position].filter(Boolean).join(" · ") ||
-                    "—"}
+                    "Not set"}
                 </div>
               </div>
             </button>
@@ -247,7 +247,7 @@ export default function PeopleBrowser({
                   style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 2 }}
                 >
                   {[active.school, active.position].filter(Boolean).join(" · ") ||
-                    "—"}
+                    "Not set"}
                 </div>
               </div>
             </div>

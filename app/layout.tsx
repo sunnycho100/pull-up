@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "UKC Social",
   description:
-    "Find your table at UKC 2026 — dinners, rides, and people worth meeting.",
+    "Find your table at UKC 2026: dinners, rides, and people worth meeting.",
 };
 
 export const viewport: Viewport = {

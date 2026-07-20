@@ -60,7 +60,7 @@ export default function MealsList({
     if (!res.ok) {
       setMine((m) => ({ ...m, [slotId]: prevMine }));
       setCounts((c) => ({ ...c, [slotId]: prevCount }));
-      flashToast(res.error === "closed" ? "This one just closed." : "Couldn't save — try again.");
+      flashToast(res.error === "closed" ? "This one just closed." : "Couldn't save. Try again.");
     }
   }
 
@@ -76,7 +76,7 @@ export default function MealsList({
     if (!res.ok) {
       setMine((m) => ({ ...m, [slotId]: prevMine }));
       setCounts((c) => ({ ...c, [slotId]: prevCount }));
-      flashToast("Couldn't leave — try again.");
+      flashToast("Couldn't leave. Try again.");
     }
   }
 

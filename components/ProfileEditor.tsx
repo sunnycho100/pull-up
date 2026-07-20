@@ -118,7 +118,7 @@ export default function ProfileEditor({
       flash("Saved");
       router.refresh();
     } else {
-      setError(res.error ?? "Couldn't save — try again.");
+      setError(res.error ?? "Couldn't save. Try again.");
     }
   }
 
@@ -155,7 +155,7 @@ export default function ProfileEditor({
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 20, fontWeight: 700 }}>{form.name || "You"}</div>
             <div style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 2 }}>
-              {[form.school, form.position].filter(Boolean).join(" · ") || "—"}
+              {[form.school, form.position].filter(Boolean).join(" · ") || "Not set"}
             </div>
           </div>
         </div>
@@ -236,7 +236,7 @@ export default function ProfileEditor({
       </div>
       {upload === "error" && (
         <p style={{ textAlign: "center", fontSize: 13, color: "var(--danger)", marginBottom: 8 }}>
-          Upload failed —{" "}
+          Upload failed.{" "}
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
@@ -278,7 +278,7 @@ export default function ProfileEditor({
           style={field}
           value={custom}
           onChange={(e) => setCustom(e.target.value)}
-          placeholder="Add an interest — press Enter"
+          placeholder="Add an interest, press Enter"
         />
       </form>
 

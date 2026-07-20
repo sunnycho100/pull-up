@@ -137,7 +137,7 @@ export default function StepBasics({
           >
             Retry
           </button>{" "}
-          or skip — we&apos;ll use your initials.
+          or skip, we&apos;ll use your initials.
         </p>
       )}
 

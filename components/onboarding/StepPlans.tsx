@@ -68,7 +68,7 @@ export default function StepPlans({
     <>
       <h1 style={{ fontSize: 28, fontWeight: 700 }}>Which dinners are you in for?</h1>
       <p style={{ color: "var(--ink-2)", marginTop: 6, fontSize: 15 }}>
-        Pick any — we&apos;ll seat you with people worth meeting.
+        Pick any. We&apos;ll seat you with people worth meeting.
       </p>
 
       <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
