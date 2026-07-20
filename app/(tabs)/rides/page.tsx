@@ -8,9 +8,9 @@ const timeFmt = new Intl.DateTimeFormat("en-US", {
 const fmt = (iso: string) => timeFmt.format(new Date(iso));
 
 export default async function RidesPage() {
-  // Example arrivals into Orlando (MCO) the afternoon before UKC 2026.
-  // Live once AERODATABOX_API_KEY is set; the seed keeps it working offline.
-  const arrivals = await fetchArrivals("MCO", "2026-08-04T12:00", "2026-08-04T20:00");
+  // Evening arrivals into Orlando (MCO) the day before UKC 2026 — the band when most
+  // attendees land. Live once AERODATABOX_API_KEY is set; the seed keeps it working offline.
+  const arrivals = await fetchArrivals("MCO", "2026-08-04T17:00", "2026-08-04T19:00");
   const pools = bucketIntoPools(arrivals, 30);
   const live = !!process.env.AERODATABOX_API_KEY;
 
@@ -45,8 +45,7 @@ export default async function RidesPage() {
             </div>
             {pool.arrivals.length > 1 && (
               <div className="pool-cta">
-                {pool.arrivals.length} people could split a car (~$40–70 → ~$
-                {Math.round(55 / pool.arrivals.length)} each)
+                {pool.arrivals.length} landing here · ~${Math.round(55 / Math.min(4, pool.arrivals.length))} each in a shared car
               </div>
             )}
           </div>
