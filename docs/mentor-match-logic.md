@@ -44,20 +44,46 @@ Greedy: rank every mentee×mentor pair by score, walk down assigning a mentee to
 the mentee is unassigned and the mentor is under capacity (default 2 mentees each). Not globally
 optimal (no Hungarian) — good enough to validate scores; upgrade if pairings look unfair.
 
-## 4. Suggest a group of 4 — `suggestGroups(assignments, people)`
+## 4. Suggest a group of 4 — `suggestGroups(assignments, people, { affinityFloor })`
 
 Fuse two matched pairs into a group (2 mentors + 2 mentees). Rank every pair-of-pairs by
 **affinity** = mean topic score across the 4 cross-combos (role-neutral — grouping is about shared
-field/vibe). Greedily merge; a pair with no distinct partner left stays a duo. Guard: never fuse
-two pairs that share a mentor (would make a 3-person "group").
+field/vibe). Greedily merge. Two guards:
+- never fuse two pairs that share a mentor (would make a 3-person "group");
+- never fuse below the **affinity floor** (`WEIGHTS.groupAffinityFloor`, default **0.40**) — a weak
+  pairing is left as a 1:1 duo rather than forced into a bad group.
+
+A pair with no above-floor, non-overlapping partner stays a duo.
 
 ## Test-run findings (30 people, 15/15)
 
 - **1:1 pairs are healthy** — same-field 90–100%, same-field/different-area 70–81%.
-- **Grouping tail is weak** — greedy fusion strands mismatched leftovers (a CS pair got fused with a
-  Data-Science pair at **6.8%**). Cross-field groups that are adjacent (ME+EE robotics) read fine.
-- **Open refinement:** add an affinity floor — below ~40%, don't force a group; leave the pairs
-  as 1:1 only. Cheap change in `suggestGroups`, do it if the low-affinity groups bother us.
+- **Grouping tail was weak** — greedy fusion once strands mismatched leftovers (a CS pair got fused
+  with a Data-Science pair at **6.8%**). **Fixed** with the 0.40 affinity floor: those weak pairs
+  now stay as 1:1 duos. Adjacent cross-field groups (ME+EE robotics, ~53%) still form.
+
+## How matching runs (the model, not yet built)
+
+Matching is **behind the scenes**, not a live browse. Decided flow:
+
+1. **Batch after sign-up closes.** Once everyone has a profile, a match job runs. No one hand-picks;
+   the algorithm above assigns pairs + groups.
+2. **A new person each day.** Day 1, Day 2, Day 3 → each attendee is introduced to a *different*
+   match. So the job runs per day and must **exclude already-seen pairings** (track a `seen` set of
+   (a,b) per user; rank next-best unseen match each morning).
+3. **A match is an offer, not a fact.** Either side may take it or ignore it — the day still rotates
+   to someone new. (Whether "both accepted" unlocks contact/DM is a later call.)
+4. **Opt-out lives in settings** — "Stop meeting new people." Clicking it shows **one retention
+   confirm** before it takes effect:
+   > *We really hope to connect you with new people every day!*
+   > *Are you sure you want to leave?*
+   Confirm → the daily job skips this user. (A quiet setting to re-enable, no dark patterns beyond
+   the single confirm.)
+
+**What building it needs (next phase):** real `role`/`field`/`research_area` columns + onboarding
+capture; a `matches` table (day, a, b, status); a daily job (cron / Supabase scheduled fn) that
+picks next-best *unseen* matches; a `matching_enabled` flag on the profile + the settings toggle and
+confirm dialog. None of this exists yet — the algorithm is validated on synthetic data first.
 
 ## Not built yet (deferred on purpose)
 

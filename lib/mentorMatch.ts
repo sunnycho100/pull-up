@@ -26,6 +26,7 @@ export const WEIGHTS = {
   peerRoleFactor: 0.7,
   crossSchoolBonus: 0.05,
   mentorCapacity: 2,
+  groupAffinityFloor: 0.4, // don't fuse two pairs below this — leave them as 1:1 duos
 } as const;
 
 const MENTOR_ROLES: ReadonlySet<Role> = new Set<Role>(["phd", "industry"]);
@@ -128,8 +129,13 @@ function groupAffinity(pairA: [Person, Person], pairB: [Person, Person]): number
 }
 
 // Fuse assigned pairs into groups of 4: rank every pair-of-pairs by affinity, greedily
-// merge unused pairs. An odd pair left over stays a duo.
-export function suggestGroups(assignments: Assignment[], people: Person[]): SuggestedGroup[] {
+// merge unused pairs. A pair with no good partner (below the floor, or odd one out) stays a duo.
+export function suggestGroups(
+  assignments: Assignment[],
+  people: Person[],
+  opts: { affinityFloor?: number } = {},
+): SuggestedGroup[] {
+  const floor = opts.affinityFloor ?? WEIGHTS.groupAffinityFloor;
   const byId = new Map(people.map((p) => [p.id, p]));
   const pairs = assignments.map((a) => {
     const mentee = byId.get(a.menteeId)!;
@@ -144,7 +150,9 @@ export function suggestGroups(assignments: Assignment[], people: Person[]): Sugg
       // "group" of only 3 distinct people. Only fuse pairs with no shared member.
       const ids = new Set(pairs[i].members.map((p) => p.id));
       if (pairs[j].members.some((p) => ids.has(p.id))) continue;
-      cand.push({ i, j, affinity: groupAffinity(pairs[i].members, pairs[j].members) });
+      const affinity = groupAffinity(pairs[i].members, pairs[j].members);
+      if (affinity < floor) continue; // too weak to force together — better left as a 1:1
+      cand.push({ i, j, affinity });
     }
   cand.sort((x, y) => y.affinity - x.affinity);
 

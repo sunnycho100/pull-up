@@ -145,4 +145,24 @@ describe("suggestGroups", () => {
     const groups = suggestGroups(assignments, people);
     for (const g of groups) expect(new Set(g.memberIds).size).toBe(g.memberIds.length);
   });
+
+  it("respects the affinity floor: weak pairs stay as duos instead of a forced group", () => {
+    // Two same-field pairs (would fuse ~1.0) + one unrelated Physics pair. With a high
+    // floor, the Physics pair has no above-floor partner and must stay a duo.
+    const people = [
+      P("m1", "phd", { field: "CS", researchArea: "CV" }),
+      P("s1", "undergrad", { field: "CS", researchArea: "CV" }),
+      P("m2", "phd", { field: "CS", researchArea: "CV" }),
+      P("s2", "undergrad", { field: "CS", researchArea: "CV" }),
+      P("m3", "phd", { field: "Physics", researchArea: "Optics" }),
+      P("s3", "undergrad", { field: "Physics", researchArea: "Optics" }),
+    ];
+    const assignments = assignMentees(people, { mentorCapacity: 1 });
+    const floored = suggestGroups(assignments, people, { affinityFloor: 0.5 });
+    const sizes = floored.map((g) => g.memberIds.length).sort();
+    expect(sizes).toEqual([2, 4]); // CS pairs fuse; Physics pair left as a duo
+    // With floor 0, everything can fuse (3 pairs → one group of 4 + one duo).
+    const nofloor = suggestGroups(assignments, people, { affinityFloor: 0 });
+    expect(nofloor.some((g) => g.memberIds.length === 4)).toBe(true);
+  });
 });
