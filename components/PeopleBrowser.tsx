@@ -410,7 +410,7 @@ export default function PeopleBrowser({
           background: var(--bg);
           border-radius: 16px 16px 0 0;
           padding: 8px 20px calc(24px + env(safe-area-inset-bottom));
-          box-shadow: 0 -8px 40px rgba(10, 37, 64, 0.18);
+          box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
           animation: sheet-up 300ms cubic-bezier(0.16, 1, 0.3, 1);
         }
         .grabber {

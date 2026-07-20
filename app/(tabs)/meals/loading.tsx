@@ -43,7 +43,7 @@ export default function MealsLoading() {
           content: "";
           position: absolute;
           inset: 0;
-          background: linear-gradient(90deg, transparent, rgba(10,37,64,0.05), transparent);
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
           transform: translateX(-100%);
           animation: sk-shimmer 1.3s infinite;
         }

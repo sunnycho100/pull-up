@@ -408,11 +408,11 @@ function PeStyles() {
         transform: translateX(-50%);
         z-index: 60;
         background: var(--ink);
-        color: #fff;
+        color: var(--bg);
         font-size: 14px;
         padding: 10px 16px;
         border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(10, 37, 64, 0.2);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
         animation: pe-toast-in 200ms ease-out;
       }
       @keyframes pe-toast-in {
