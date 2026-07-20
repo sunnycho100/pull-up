@@ -13,18 +13,34 @@ export default async function GroupChatPage({
   // RLS gives members-only access — a non-member gets null → 404.
   const { data: group } = await supabase
     .from("groups")
-    .select("id, name")
+    .select("id, name, suggested_place, meet_time")
     .eq("id", id)
     .maybeSingle();
   if (!group) notFound();
+
+  // The roster: who a member is talking to. Seeds the header, empty state,
+  // and per-message avatars so nobody is an anonymous bubble.
+  const { data: rows } = await supabase
+    .from("group_members")
+    .select("user_id, profile:profiles(name, photo_url)")
+    .eq("group_id", id);
+
+  const members = (rows ?? []).map((r: any) => ({
+    userId: r.user_id as string,
+    name: (r.profile?.name as string) ?? "Someone",
+    photo_url: (r.profile?.photo_url as string | null) ?? null,
+  }));
 
   return (
     <Chat
       channelType="meal"
       channelId={group.id}
       currentUserId={user.id}
-      title={group.name}
-      subtitle="Group chat"
+      groupId={group.id}
+      groupName={group.name}
+      members={members}
+      meetPlace={group.suggested_place ?? null}
+      meetTime={group.meet_time ?? null}
     />
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { sendMessage } from "@/app/actions/messages";
@@ -14,30 +15,111 @@ type Msg = {
   failed?: boolean;
 };
 
-type Profile = { name: string; photo_url: string | null };
+type Member = { userId: string; name: string; photo_url: string | null };
+
+const TZ = "America/New_York";
+const timeFmt = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: TZ,
+});
+const dayTimeFmt = new Intl.DateTimeFormat("en-US", {
+  weekday: "short",
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: TZ,
+});
+
+// A run break starts a new visual group: different speaker, or >5min gap.
+const RUN_GAP_MS = 5 * 60 * 1000;
+function breaksRun(m: Msg, prev?: Msg) {
+  if (!prev) return true;
+  if (prev.user_id !== m.user_id) return true;
+  return +new Date(m.created_at) - +new Date(prev.created_at) > RUN_GAP_MS;
+}
+
+function initials(name: string) {
+  const p = name.trim().split(/\s+/).filter(Boolean);
+  return ((p[0]?.[0] ?? "") + (p[1]?.[0] ?? "")).toUpperCase() || "?";
+}
+
+function Avatar({
+  name,
+  url,
+  size = 32,
+}: {
+  name: string;
+  url: string | null;
+  size?: number;
+}) {
+  return (
+    <span
+      aria-hidden
+      style={{
+        flexShrink: 0,
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        display: "grid",
+        placeItems: "center",
+        fontSize: size * 0.36,
+        fontWeight: 700,
+        fontFamily: "var(--font-display), sans-serif",
+        color: "var(--ink-2)",
+        background: url
+          ? `center/cover no-repeat url("${url}")`
+          : "var(--surface)",
+        border: "1px solid var(--line)",
+        overflow: "hidden",
+      }}
+    >
+      {!url && initials(name)}
+    </span>
+  );
+}
 
 export default function Chat({
   channelType,
   channelId,
   currentUserId,
-  title,
-  subtitle,
+  groupId,
+  groupName,
+  members,
+  meetPlace,
+  meetTime,
 }: {
   channelType: "meal" | "ride";
   channelId: string;
   currentUserId: string;
-  title: string;
-  subtitle?: string;
+  groupId: string;
+  groupName: string;
+  members: Member[];
+  meetPlace: string | null;
+  meetTime: string | null;
 }) {
   const router = useRouter();
   const supabase = useRef(createClient()).current;
   const [messages, setMessages] = useState<Msg[]>([]);
-  const [profiles, setProfiles] = useState<Record<string, Profile>>({});
+  const [loading, setLoading] = useState(true);
+  const [rosterOpen, setRosterOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Load the names/photos for a set of user_ids we don't already have.
+  // Seed the profile lookup from the roster so senders resolve instantly —
+  // no "…" flash. loadProfiles stays as a fallback for any id not in the group.
+  const [profiles, setProfiles] = useState<Record<string, Member>>(() => {
+    const seed: Record<string, Member> = {};
+    for (const m of members) seed[m.userId] = m;
+    return seed;
+  });
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const nearBottom = useRef(true);
+
+  const nameOf = (id: string) =>
+    id === currentUserId ? "You" : profiles[id]?.name ?? "…";
+
   const loadProfiles = useCallback(
     async (ids: string[]) => {
       const missing = ids.filter((id) => id && !profiles[id]);
@@ -50,7 +132,7 @@ export default function Chat({
         setProfiles((prev) => {
           const next = { ...prev };
           for (const p of data as any[])
-            next[p.id] = { name: p.name, photo_url: p.photo_url };
+            next[p.id] = { userId: p.id, name: p.name, photo_url: p.photo_url };
           return next;
         });
       }
@@ -68,9 +150,10 @@ export default function Chat({
         .eq("channel_id", channelId)
         .order("created_at", { ascending: false })
         .limit(100);
-      if (!active || !data) return;
-      const rows = (data as Msg[]).slice().reverse();
+      if (!active) return;
+      const rows = ((data as Msg[]) ?? []).slice().reverse();
       setMessages(rows);
+      setLoading(false);
       loadProfiles([...new Set(rows.map((m) => m.user_id))]);
     })();
     return () => {
@@ -106,16 +189,22 @@ export default function Chat({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channelId]);
 
-  // Auto-scroll to bottom when messages change.
+  // Auto-scroll to bottom — but only if the user is already near it, so we
+  // don't yank someone reading history back down on every new message.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: "end" });
-  }, [messages]);
+    if (nearBottom.current) bottomRef.current?.scrollIntoView({ block: "end" });
+  }, [messages, loading]);
+
+  function onScroll() {
+    const el = scrollRef.current;
+    if (!el) return;
+    nearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+  }
 
   async function deliver(tempId: string, body: string) {
     const res = await sendMessage(channelType, channelId, body);
     setMessages((prev) => {
       if (res.ok && res.message) {
-        // Replace optimistic row with the real one; drop if realtime beat us to it.
         const real = res.message;
         if (prev.some((m) => m.id === real.id))
           return prev.filter((m) => m.id !== tempId);
@@ -131,6 +220,7 @@ export default function Chat({
     const body = draft.trim();
     if (!body || sending) return;
     setSending(true);
+    nearBottom.current = true; // my own message always scrolls into view
     const tempId = `tmp-${Date.now()}`;
     setMessages((prev) => [
       ...prev,
@@ -156,130 +246,158 @@ export default function Chat({
     deliver(m.id, m.body);
   }
 
+  const others = members.filter((m) => m.userId !== currentUserId);
+  const stack = members.slice(0, 3);
+  // "You, Min, Sarah +2" — you first, then names, capped.
+  const rosterLine = (() => {
+    const names = ["You", ...others.map((m) => m.name.split(/\s+/)[0])];
+    const shown = names.slice(0, 3).join(", ");
+    const extra = names.length - 3;
+    return extra > 0 ? `${shown} +${extra}` : shown;
+  })();
+  const meetLine = [meetPlace, meetTime && dayTimeFmt.format(new Date(meetTime))]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100dvh",
-      }}
-    >
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          padding: "12px 16px calc(12px + env(safe-area-inset-top))",
-          borderBottom: "1px solid var(--line)",
-          flexShrink: 0,
-        }}
-      >
-        <button
-          onClick={() => router.back()}
-          aria-label="Back"
-          style={{
-            border: "none",
-            background: "none",
-            padding: 4,
-            cursor: "pointer",
-            color: "var(--ink-2)",
-            fontSize: 20,
-            lineHeight: 1,
-          }}
-        >
-          ‹
+    <div className="chat-root">
+      <header className="chat-head">
+        <button className="hit" onClick={() => router.back()} aria-label="Back">
+          <svg width="11" height="18" viewBox="0 0 11 18" fill="none" aria-hidden>
+            <path
+              d="M9.5 1.5 2 9l7.5 7.5"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>{title}</div>
-          {subtitle && (
-            <div style={{ fontSize: 12, color: "var(--ink-3)" }}>{subtitle}</div>
-          )}
-        </div>
+
+        <button
+          className="head-id"
+          onClick={() => setRosterOpen(true)}
+          aria-label={`${members.length} people at your table — open roster`}
+        >
+          <span className="stack">
+            {stack.map((m) => (
+              <span key={m.userId} className="stack-av">
+                <Avatar name={m.name} url={m.photo_url} size={26} />
+              </span>
+            ))}
+          </span>
+          <span className="head-text">
+            <span className="head-title">{groupName}</span>
+            <span className="head-sub">{rosterLine}</span>
+          </span>
+          <svg
+            className="head-caret"
+            width="8"
+            height="14"
+            viewBox="0 0 8 14"
+            fill="none"
+            aria-hidden
+          >
+            <path
+              d="M1.5 1.5 7 7l-5.5 5.5"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       </header>
 
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "16px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 4,
-        }}
-      >
-        {messages.length === 0 ? (
-          <div
-            style={{
-              margin: "auto",
-              color: "var(--ink-3)",
-              fontSize: 15,
-              textAlign: "center",
-            }}
-          >
-            Say hi and share who you are 👋
+      <div className="chat-scroll" ref={scrollRef} onScroll={onScroll}>
+        {loading ? (
+          <div className="skeleton" aria-hidden>
+            {[0, 1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className={`sk-row ${i % 2 ? "sk-mine" : ""}`}
+              >
+                <span
+                  className="sk-bubble shimmer"
+                  style={{ width: `${45 + ((i * 37) % 40)}%` }}
+                />
+              </div>
+            ))}
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="empty">
+            <div className="empty-cluster">
+              {members.slice(0, 5).map((m, i) => (
+                <span
+                  key={m.userId}
+                  className="empty-av"
+                  style={{ marginLeft: i === 0 ? 0 : -14, zIndex: 5 - i }}
+                >
+                  <Avatar name={m.name} url={m.photo_url} size={52} />
+                </span>
+              ))}
+            </div>
+            <h2 className="empty-title">You&apos;re matched</h2>
+            <p className="empty-sub">
+              {members.length} {members.length === 1 ? "person" : "people"} at{" "}
+              <span style={{ color: "var(--ink)", fontWeight: 600 }}>
+                {groupName}
+              </span>
+              . Say hi and share who you are 👋
+            </p>
+            {meetLine && (
+              <div className="empty-plan">
+                <span className="plan-kicker">Your plan</span>
+                <span className="plan-line">{meetLine}</span>
+              </div>
+            )}
           </div>
         ) : (
           messages.map((m, i) => {
-            const mine = m.user_id === currentUserId;
             const prev = messages[i - 1];
-            const showName = !mine && (!prev || prev.user_id !== m.user_id);
+            const mine = m.user_id === currentUserId;
+            const newRun = breaksRun(m, prev);
+            const t = timeFmt.format(new Date(m.created_at));
+
+            if (mine) {
+              return (
+                <div
+                  key={m.id}
+                  className="row mine"
+                  style={{ marginTop: newRun ? 12 : 2 }}
+                >
+                  {newRun && <div className="meta meta-r">{t}</div>}
+                  <div className="bubble bubble-mine">{m.body}</div>
+                  {m.pending && <div className="status">Sending…</div>}
+                  {m.failed && (
+                    <button className="retry" onClick={() => retry(m)}>
+                      Couldn&apos;t send · Retry
+                    </button>
+                  )}
+                </div>
+              );
+            }
+
             return (
               <div
                 key={m.id}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: mine ? "flex-end" : "flex-start",
-                  marginTop: showName ? 8 : 0,
-                }}
+                className="row them"
+                style={{ marginTop: newRun ? 12 : 2 }}
               >
-                {showName && (
-                  <span
-                    style={{
-                      fontSize: 11.5,
-                      fontWeight: 600,
-                      color: "var(--accent)",
-                      margin: "0 0 2px 4px",
-                    }}
-                  >
-                    {profiles[m.user_id]?.name ?? "…"}
-                  </span>
+                {newRun ? (
+                  <Avatar name={nameOf(m.user_id)} url={profiles[m.user_id]?.photo_url ?? null} />
+                ) : (
+                  <span className="av-spacer" />
                 )}
-                <div
-                  style={{
-                    maxWidth: "78%",
-                    padding: "9px 13px",
-                    borderRadius: 18,
-                    fontSize: 15,
-                    lineHeight: 1.35,
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                    opacity: m.pending ? 0.6 : 1,
-                    background: mine ? "var(--accent)" : "var(--surface)",
-                    color: mine ? "var(--accent-ink)" : "var(--ink)",
-                    borderBottomRightRadius: mine ? 4 : 18,
-                    borderBottomLeftRadius: mine ? 18 : 4,
-                  }}
-                >
-                  {m.body}
+                <div className="them-col">
+                  {newRun && (
+                    <div className="meta">
+                      <span className="meta-name">{nameOf(m.user_id)}</span>
+                      <span className="meta-time">{t}</span>
+                    </div>
+                  )}
+                  <div className="bubble bubble-them">{m.body}</div>
                 </div>
-                {m.failed && (
-                  <button
-                    onClick={() => retry(m)}
-                    style={{
-                      marginTop: 3,
-                      fontSize: 11.5,
-                      fontWeight: 600,
-                      color: "var(--danger)",
-                      background: "none",
-                      border: "none",
-                      padding: "0 4px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Failed. Retry
-                  </button>
-                )}
               </div>
             );
           })
@@ -287,16 +405,7 @@ export default function Chat({
         <div ref={bottomRef} />
       </div>
 
-      <div
-        style={{
-          flexShrink: 0,
-          display: "flex",
-          gap: 8,
-          padding: "10px 12px calc(10px + env(safe-area-inset-bottom))",
-          borderTop: "1px solid var(--line)",
-          background: "var(--bg)",
-        }}
-      >
+      <div className="composer">
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -306,38 +415,255 @@ export default function Chat({
               submit();
             }
           }}
-          placeholder="Message"
+          placeholder={`Message ${groupName}`}
           maxLength={2000}
-          style={{
-            flex: 1,
-            padding: "11px 14px",
-            border: "1px solid var(--line)",
-            borderRadius: 22,
-            fontSize: 15,
-            outline: "none",
-            background: "var(--surface)",
-            color: "var(--ink)",
-          }}
+          aria-label="Message"
         />
         <button
+          className="send"
           onClick={submit}
           disabled={!draft.trim() || sending}
-          style={{
-            flexShrink: 0,
-            padding: "0 18px",
-            border: "none",
-            borderRadius: 22,
-            fontSize: 15,
-            fontWeight: 600,
-            color: "var(--accent-ink)",
-            background: "var(--accent)",
-            opacity: !draft.trim() || sending ? 0.4 : 1,
-            cursor: !draft.trim() || sending ? "default" : "pointer",
-          }}
+          aria-label="Send"
         >
-          Send
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path
+              d="M4 12 20 4l-4 16-4-7-8-1Z"
+              fill="currentColor"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
       </div>
+
+      {rosterOpen && (
+        <div className="sheet-backdrop" onClick={() => setRosterOpen(false)}>
+          <div
+            className="sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Your table"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="grabber" aria-hidden />
+            <div className="sheet-kicker">Your table</div>
+            <h2 className="sheet-title">{groupName}</h2>
+            <div className="roster">
+              {members.map((m) => (
+                <div key={m.userId} className="roster-row">
+                  <Avatar name={m.name} url={m.photo_url} size={40} />
+                  <span className="roster-name">
+                    {m.userId === currentUserId ? "You" : m.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {meetLine && (
+              <div className="sheet-plan">
+                <span className="plan-kicker">Plan</span>
+                <span className="plan-line">{meetLine}</span>
+              </div>
+            )}
+            <Link
+              href={`/groups/${groupId}`}
+              className="sheet-link"
+              onClick={() => setRosterOpen(false)}
+            >
+              See full profiles ▸
+            </Link>
+            <button className="sheet-close" onClick={() => setRosterOpen(false)}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        .chat-root { display: flex; flex-direction: column; height: 100dvh; }
+
+        .chat-head {
+          display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+          padding: calc(8px + env(safe-area-inset-top)) 8px 8px;
+          border-bottom: 1px solid var(--line);
+          background: var(--bg);
+        }
+        .hit {
+          flex-shrink: 0; width: 44px; height: 44px;
+          display: grid; place-items: center;
+          border: none; background: none; cursor: pointer;
+          color: var(--ink-2); border-radius: 12px;
+        }
+        .hit:active { background: var(--surface); }
+        .head-id {
+          flex: 1; min-width: 0;
+          display: flex; align-items: center; gap: 10px;
+          border: none; background: none; cursor: pointer;
+          padding: 4px 8px; border-radius: 12px; text-align: left;
+          color: var(--ink);
+        }
+        .head-id:active { background: var(--surface); }
+        .stack { display: inline-flex; flex-shrink: 0; }
+        .stack-av { display: inline-flex; margin-left: -9px; }
+        .stack-av:first-child { margin-left: 0; }
+        .stack-av > span { box-shadow: 0 0 0 2px var(--bg); }
+        .head-text { min-width: 0; display: flex; flex-direction: column; }
+        .head-title {
+          font-family: var(--font-display), sans-serif;
+          font-size: 16px; font-weight: 700; letter-spacing: -0.01em;
+          line-height: 1.15;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .head-sub {
+          font-size: 12px; color: var(--ink-3); margin-top: 1px;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .head-caret { flex-shrink: 0; color: var(--ink-3); }
+
+        .chat-scroll {
+          flex: 1; overflow-y: auto; padding: 16px;
+          display: flex; flex-direction: column;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .row { display: flex; }
+        .row.mine { flex-direction: column; align-items: flex-end; }
+        .row.them { gap: 8px; align-items: flex-start; }
+        .av-spacer { flex-shrink: 0; width: 32px; }
+        .them-col { min-width: 0; max-width: 78%; display: flex; flex-direction: column; }
+
+        .meta { display: flex; align-items: baseline; gap: 7px; margin: 0 0 3px 2px; }
+        .meta-r { justify-content: flex-end; margin: 0 2px 3px 0; }
+        .meta-name {
+          font-family: var(--font-display), sans-serif;
+          font-size: 13px; font-weight: 700; color: var(--ink);
+          letter-spacing: -0.01em;
+        }
+        .meta-time { font-size: 11px; color: var(--ink-3); }
+        .meta-r.meta { font-size: 11px; color: var(--ink-3); }
+
+        .bubble {
+          max-width: 100%;
+          padding: 9px 13px; border-radius: 16px;
+          font-size: 15px; line-height: 1.38;
+          white-space: pre-wrap; word-break: break-word;
+        }
+        .bubble-them { background: var(--surface); color: var(--ink); border-bottom-left-radius: 5px; }
+        .bubble-mine { background: var(--accent); color: var(--accent-ink); border-bottom-right-radius: 5px; }
+
+        .status { font-size: 11px; color: var(--ink-3); margin: 3px 4px 0 0; }
+        .retry {
+          margin-top: 4px; padding: 4px 10px;
+          font-size: 12px; font-weight: 600;
+          color: var(--danger); background: none;
+          border: 1px solid var(--danger); border-radius: 999px;
+          cursor: pointer;
+        }
+
+        /* Loading skeleton */
+        .skeleton { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
+        .sk-row { display: flex; }
+        .sk-mine { justify-content: flex-end; }
+        .sk-bubble { height: 38px; border-radius: 16px; display: block; }
+        .shimmer {
+          background: linear-gradient(90deg, var(--surface) 0%, var(--line) 50%, var(--surface) 100%);
+          background-size: 200% 100%;
+          animation: shimmer 1.3s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+          from { background-position: 200% 0; }
+          to { background-position: -200% 0; }
+        }
+
+        /* Empty / arrival state */
+        .empty { margin: auto; text-align: center; padding: 24px 8px; max-width: 340px; }
+        .empty-cluster { display: inline-flex; margin-bottom: 18px; }
+        .empty-av > span { box-shadow: 0 0 0 3px var(--bg); }
+        .empty-title {
+          font-family: var(--font-display), sans-serif;
+          font-size: 26px; font-weight: 800; letter-spacing: -0.03em; margin: 0;
+        }
+        .empty-sub { font-size: 15px; line-height: 1.5; color: var(--ink-2); margin: 8px 0 0; }
+        .empty-plan {
+          display: inline-flex; flex-direction: column; gap: 2px;
+          margin-top: 20px; padding-top: 16px;
+          border-top: 1px solid var(--line);
+        }
+        .sheet-plan { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
+        .plan-kicker {
+          font-size: 11px; font-weight: 700; text-transform: uppercase;
+          letter-spacing: 0.08em; color: var(--ink-3);
+        }
+        .plan-line { font-family: var(--font-display), sans-serif; font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+
+        /* Composer */
+        .composer {
+          flex-shrink: 0; display: flex; align-items: center; gap: 8px;
+          padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+          border-top: 1px solid var(--line); background: var(--bg);
+        }
+        .composer input {
+          flex: 1; padding: 11px 15px;
+          border: 1px solid var(--line); border-radius: 22px;
+          font-size: 15px; outline: none;
+          background: var(--surface); color: var(--ink);
+        }
+        .composer input:focus { border-color: var(--accent); }
+        .send {
+          flex-shrink: 0; width: 44px; height: 44px;
+          display: grid; place-items: center;
+          border: none; border-radius: 50%;
+          color: var(--accent-ink); background: var(--accent);
+          cursor: pointer; transition: opacity 150ms ease-out, transform 150ms ease-out;
+        }
+        .send:disabled { opacity: 0.35; cursor: default; }
+        .send:not(:disabled):active { transform: scale(0.92); }
+
+        /* Roster sheet — same language as JoinSheet */
+        .sheet-backdrop {
+          position: fixed; inset: 0; z-index: 100;
+          background: var(--overlay); display: flex; align-items: flex-end;
+          animation: sheet-fade 200ms ease-out;
+        }
+        .sheet {
+          width: 100%; max-height: 80dvh; overflow-y: auto;
+          background: var(--bg); border-radius: 16px 16px 0 0;
+          padding: 8px 20px calc(20px + env(safe-area-inset-bottom));
+          box-shadow: 0 -8px 40px rgba(0,0,0,0.5);
+          animation: sheet-up 300ms cubic-bezier(0.16,1,0.3,1);
+        }
+        .grabber { width: 36px; height: 5px; border-radius: 999px; background: var(--line); margin: 6px auto 14px; }
+        .sheet-kicker {
+          font-size: 11px; font-weight: 700; text-transform: uppercase;
+          letter-spacing: 0.08em; color: var(--accent);
+        }
+        .sheet-title {
+          font-family: var(--font-display), sans-serif;
+          font-size: 24px; font-weight: 800; letter-spacing: -0.03em; margin: 4px 0 8px;
+        }
+        .roster { border-bottom: 1px solid var(--line); }
+        .roster-row {
+          display: flex; align-items: center; gap: 12px;
+          padding: 12px 0; border-top: 1px solid var(--line);
+        }
+        .roster-name { font-size: 16px; font-weight: 600; }
+        .sheet-link {
+          display: inline-block; margin-top: 18px;
+          font-size: 15px; font-weight: 700; color: var(--accent);
+        }
+        .sheet-close {
+          width: 100%; margin-top: 10px; border: none; background: transparent;
+          color: var(--ink-3); font-size: 15px; padding: 12px; cursor: pointer;
+        }
+
+        @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
+        @media (prefers-reduced-motion: reduce) {
+          .sheet { animation: sheet-fade 200ms ease-out; }
+          .shimmer { animation: none; }
+          .send { transition: none; }
+        }
+      `}</style>
     </div>
   );
 }
