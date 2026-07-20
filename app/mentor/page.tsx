@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/supabase/server";
+import SignupGate from "@/components/SignupGate";
 import { MentorOptIn } from "./MentorOptIn";
 
 // Derive mentor vs mentee from the free-text position on the profile. PhD and
@@ -17,6 +18,14 @@ function roleFromPosition(position: string): "mentor" | "mentee" {
 
 export default async function MentorPage() {
   const { user, supabase } = await requireUser();
+  if (user.is_anonymous) {
+    return (
+      <SignupGate
+        title="Get matched one-on-one"
+        blurb="We pair you with someone a step ahead on your path and make the intro."
+      />
+    );
+  }
 
   // Read position + opt-in. mentor_optin may not exist yet (migration 0006
   // pending) — fall back so the page still renders.

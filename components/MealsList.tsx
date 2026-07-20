@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import JoinSheet from "./JoinSheet";
 import { joinSlot, leaveSlot } from "@/app/actions/signups";
 
@@ -30,12 +31,15 @@ export default function MealsList({
   counts: counts0,
   mine: mine0,
   nowMs,
+  isGuest = false,
 }: {
   slots: Slot[];
   counts: Record<string, number>;
   mine: Record<string, Signup>;
   nowMs: number;
+  isGuest?: boolean;
 }) {
+  const router = useRouter();
   const [mine, setMine] = useState(mine0);
   const [counts, setCounts] = useState(counts0);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -118,7 +122,11 @@ export default function MealsList({
               ) : closed ? (
                 <span className="act act--closed">Closed</span>
               ) : (
-                <button className="act act--join" data-slot-id={slot.id} onClick={() => setOpenId(slot.id)}>
+                <button
+                  className="act act--join"
+                  data-slot-id={slot.id}
+                  onClick={() => (isGuest ? router.push("/login") : setOpenId(slot.id))}
+                >
                   Join <span aria-hidden>▸</span>
                 </button>
               )}

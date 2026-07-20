@@ -38,7 +38,13 @@ export default async function MealsPage() {
           Slots open soon.
         </p>
       ) : (
-        <MealsList slots={slots} counts={counts} mine={mine} nowMs={Date.now()} />
+        <MealsList
+          slots={slots}
+          counts={counts}
+          mine={mine}
+          nowMs={Date.now()}
+          isGuest={!!user.is_anonymous}
+        />
       )}
     </section>
   );

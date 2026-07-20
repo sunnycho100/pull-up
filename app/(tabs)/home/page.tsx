@@ -33,6 +33,7 @@ type Group = {
 
 export default async function HomePage() {
   const { user, supabase } = await requireUser();
+  if (user.is_anonymous) return <GuestHomeSection />;
   const now = Date.now();
 
   // mentor_optin may not exist yet (migration 0006 pending) — fall back to name-only.
@@ -351,6 +352,47 @@ function DayOf({ group, names }: { group: Group; names: string[] }) {
         Open chat ▸
       </Link>
     </div>
+  );
+}
+
+// Home for an anonymous guest: no personal data, just what signing up unlocks.
+function GuestHomeSection() {
+  return (
+    <section style={{ padding: "24px 20px" }}>
+      <div className="eyebrow">UKC 2026</div>
+      <h1 style={{ fontSize: 40, fontWeight: 800, letterSpacing: "-0.03em", marginTop: 10, lineHeight: 1 }}>
+        Look around
+      </h1>
+      <p style={{ color: "var(--ink-2)", marginTop: 12, fontSize: 15, maxWidth: "40ch" }}>
+        Browse who&apos;s coming and what&apos;s on. Create an account when you want to join in.
+      </p>
+      <div style={{ marginTop: 28 }}>
+        <div className="hub-head">Members can</div>
+        <div className="hub-list">
+          <NudgeRow href="/login" title="Join a dinner" benefit="Get seated with people matched to what you actually work on." />
+          <NudgeRow href="/login" title="Get matched one-on-one" benefit="An hour with someone a step ahead on your path." />
+          <NudgeRow href="/login" title="Split a ride from the airport" benefit="About $20 each with your window instead of ~$60 alone." />
+        </div>
+      </div>
+      <Link
+        href="/login"
+        style={{
+          display: "block",
+          textAlign: "center",
+          marginTop: 24,
+          minHeight: 50,
+          lineHeight: "50px",
+          borderRadius: 12,
+          background: "var(--accent)",
+          color: "var(--accent-ink)",
+          fontSize: 16,
+          fontWeight: 700,
+        }}
+      >
+        Create your account
+      </Link>
+      <LinkStyles />
+    </section>
   );
 }
 

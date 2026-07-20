@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/supabase/server";
+import SignupGate from "@/components/SignupGate";
 import { AddFlightForm } from "./AddFlightForm";
 import type { Direction } from "@/lib/rides";
 
@@ -25,6 +26,14 @@ export default async function AddFlightPage({
   searchParams: Promise<{ d?: string }>;
 }) {
   const { user, supabase } = await requireUser();
+  if (user.is_anonymous) {
+    return (
+      <SignupGate
+        title="Post your flight"
+        blurb="Share your airport ride with everyone landing in your window."
+      />
+    );
+  }
   const direction: Direction = (await searchParams).d === "departure" ? "departure" : "arrival";
 
   // Prefill this direction's existing flight, if any. flights table may not exist

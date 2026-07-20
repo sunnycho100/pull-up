@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/supabase/server";
+import SignupGate from "@/components/SignupGate";
 import ProfileEditor from "@/components/ProfileEditor";
 
 const slotFmt = new Intl.DateTimeFormat("en-US", {
@@ -15,6 +16,14 @@ const one = <T,>(v: T | T[] | null | undefined): T | null =>
 
 export default async function MePage() {
   const { user, supabase } = await requireUser();
+  if (user.is_anonymous) {
+    return (
+      <SignupGate
+        title="Create your profile"
+        blurb="Save your photo, interests, and details so we can seat and match you well."
+      />
+    );
+  }
 
   const { data: profile } = await supabase
     .from("profiles")
