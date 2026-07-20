@@ -118,7 +118,7 @@ export default function MealsList({
               ) : closed ? (
                 <span className="act act--closed">Closed</span>
               ) : (
-                <button className="act act--join" onClick={() => setOpenId(slot.id)}>
+                <button className="act act--join" data-slot-id={slot.id} onClick={() => setOpenId(slot.id)}>
                   Join <span aria-hidden>▸</span>
                 </button>
               )}

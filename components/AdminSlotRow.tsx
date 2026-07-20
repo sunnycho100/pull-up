@@ -50,6 +50,7 @@ export default function AdminSlotRow({
       <button
         onClick={run}
         disabled={pending}
+        data-slot-id={slotId}
         style={{
           flexShrink: 0,
           padding: "8px 14px",

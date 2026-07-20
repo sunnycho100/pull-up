@@ -36,3 +36,6 @@ yarn-error.log*
 
 # impeccable/codex tooling (local)
 .codex/
+
+# E2E demo intermediate recordings (keep the mp4, drop the raw webm)
+demo/raw/
