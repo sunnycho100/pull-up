@@ -338,20 +338,24 @@ export default function PeopleBrowser({
         .chip-row::-webkit-scrollbar { display: none; }
         .fchip {
           flex-shrink: 0;
-          padding: 8px 14px;
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          padding: 0 14px;
           border-radius: 999px;
           font-size: 14px;
           font-weight: 500;
           border: 1px solid var(--line);
-          background: var(--surface);
-          color: var(--ink);
+          background: none;
+          color: var(--ink-2);
           cursor: pointer;
-          transition: background 150ms ease-out, color 150ms ease-out;
+          transition: background 150ms ease-out, color 150ms ease-out, border-color 150ms ease-out;
         }
         .fchip--on {
           border-color: var(--accent);
-          background: var(--accent);
-          color: var(--accent-ink);
+          background: color-mix(in srgb, var(--accent) 10%, transparent);
+          color: var(--accent);
+          font-weight: 600;
         }
         .person-row {
           display: flex;

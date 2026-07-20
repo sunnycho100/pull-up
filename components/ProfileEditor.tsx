@@ -223,9 +223,9 @@ export default function ProfileEditor({
                 inset: 0,
                 display: "grid",
                 placeItems: "center",
-                background: "rgba(255,255,255,0.7)",
+                background: "rgba(0,0,0,0.6)",
                 fontSize: 12,
-                color: "var(--ink-2)",
+                color: "var(--ink)",
               }}
             >
               Uploading…
@@ -359,17 +359,19 @@ function PeStyles() {
         cursor: pointer;
       }
       .pe-edit-btn {
-        display: block;
-        width: 100%;
-        margin-top: 24px;
-        padding: 13px;
-        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        margin-top: 20px;
+        padding: 0 2px;
         font-size: 15px;
-        font-weight: 600;
-        border: 1px solid var(--line);
-        color: var(--ink);
-        background: var(--bg);
+        font-weight: 700;
+        border: none;
+        color: var(--accent);
+        background: none;
+        cursor: pointer;
       }
+      .pe-edit-btn::after { content: " ▸"; }
       .pe-signout {
         display: block;
         width: 100%;

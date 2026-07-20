@@ -121,7 +121,7 @@ function Fresh({ name }: { name: string }) {
       <p style={{ color: "var(--ink-2)", marginTop: 8, fontSize: 15 }}>
         Nothing on your plate yet. Let&apos;s find your people for tonight.
       </p>
-      <div style={{ display: "grid", gap: 14, marginTop: 24 }}>
+      <div style={{ marginTop: 24, borderBottom: "1px solid var(--line)" }}>
         <CtaCard
           href="/meals"
           title="Find your table"
@@ -139,18 +139,12 @@ function Fresh({ name }: { name: string }) {
 
 function CtaCard({ href, title, sub }: { href: string; title: string; sub: string }) {
   return (
-    <Link
-      href={href}
-      style={{
-        display: "block",
-        padding: "20px",
-        borderRadius: 16,
-        border: "1px solid var(--line)",
-        background: "var(--surface)",
-      }}
-    >
-      <div style={{ fontSize: 18, fontWeight: 700, color: "var(--ink)" }}>{title}</div>
-      <div style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 6 }}>{sub}</div>
+    <Link href={href} className="cta-row">
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 18, fontWeight: 700, color: "var(--ink)" }}>{title}</div>
+        <div style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 4 }}>{sub}</div>
+      </div>
+      <span className="cta-chev" aria-hidden>▸</span>
     </Link>
   );
 }
@@ -159,20 +153,14 @@ function JoinedWaiting({ slot }: { slot: Slot }) {
   return (
     <div>
       <div className="eyebrow">You&apos;re in</div>
-      <h1 style={{ fontSize: 26, fontWeight: 700, marginTop: 6 }}>{slot.title}</h1>
-      <p style={{ color: "var(--ink-2)", marginTop: 8, fontSize: 15 }}>
+      <h1 style={{ fontSize: 40, fontWeight: 800, letterSpacing: "-0.03em", marginTop: 10, lineHeight: 1 }}>
+        {slot.title}
+      </h1>
+      <p style={{ color: "var(--ink-2)", marginTop: 12, fontSize: 15 }}>
         {timeFmt.format(new Date(slot.starts_at))}
         {slot.area ? ` · ${slot.area}` : ""}
       </p>
-      <div
-        style={{
-          marginTop: 20,
-          padding: "16px 18px",
-          borderRadius: 14,
-          border: "1px solid var(--line)",
-          background: "var(--surface)",
-        }}
-      >
+      <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--line)" }}>
         <div style={{ fontSize: 15, color: "var(--ink)" }}>
           Tables assigned at{" "}
           <strong>{timeFmt.format(new Date(slot.join_deadline))}</strong>
@@ -192,33 +180,17 @@ function Revealed({ group, names }: { group: Group; names: string[] }) {
   return (
     <div>
       <div className="eyebrow">Your table is set</div>
-      <Link
-        href={`/groups/${group.id}`}
-        style={{
-          display: "block",
-          marginTop: 12,
-          padding: "22px 20px",
-          borderRadius: 16,
-          border: "1px solid var(--line)",
-          background: "var(--surface)",
-        }}
-      >
-        <div style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)" }}>
-          {group.name}
-        </div>
-        {names.length > 0 && (
-          <div style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 8 }}>
-            {names.join(" · ")}
-          </div>
-        )}
-        {group.suggested_place && (
-          <div style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 6 }}>
-            📍 {group.suggested_place}
-          </div>
-        )}
-        <div style={{ fontSize: 14, color: "var(--accent)", fontWeight: 600, marginTop: 14 }}>
-          Meet your table →
-        </div>
+      <h1 style={{ fontSize: 40, fontWeight: 800, letterSpacing: "-0.03em", marginTop: 10, lineHeight: 1 }}>
+        {group.name}
+      </h1>
+      {names.length > 0 && (
+        <p style={{ fontSize: 15, color: "var(--ink-2)", marginTop: 12 }}>{names.join(" · ")}</p>
+      )}
+      {group.suggested_place && (
+        <p style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 6 }}>📍 {group.suggested_place}</p>
+      )}
+      <Link href={`/groups/${group.id}`} className="cta-line">
+        Meet your table <span aria-hidden>▸</span>
       </Link>
     </div>
   );
@@ -229,7 +201,7 @@ function DayOf({ group, names }: { group: Group; names: string[] }) {
   return (
     <div>
       <div className="eyebrow">Tonight</div>
-      <h1 style={{ fontSize: 30, fontWeight: 700, marginTop: 6 }}>
+      <h1 style={{ fontSize: 48, fontWeight: 800, letterSpacing: "-0.03em", marginTop: 10, lineHeight: 1 }}>
         {meet ? timeFmt.format(new Date(meet)) : "Soon"}
       </h1>
       {group.suggested_place && (
@@ -248,14 +220,14 @@ function DayOf({ group, names }: { group: Group; names: string[] }) {
           textAlign: "center",
           marginTop: 24,
           padding: "15px",
-          borderRadius: 14,
+          borderRadius: 999,
           fontSize: 16,
-          fontWeight: 600,
-          background: "var(--accent)",
-          color: "var(--accent-ink)",
+          fontWeight: 700,
+          border: "1px solid var(--accent)",
+          color: "var(--accent)",
         }}
       >
-        Open chat
+        Open chat ▸
       </Link>
     </div>
   );
@@ -266,8 +238,8 @@ function LinkStyles() {
     <style>{`
       .eyebrow {
         font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.04em;
+        font-weight: 600;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
         color: var(--accent);
       }
@@ -278,6 +250,28 @@ function LinkStyles() {
         font-weight: 600;
         color: var(--accent);
       }
+      .cta-line {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 44px;
+        margin-top: 16px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .cta-line span { display: inline-block; transition: transform 0.15s ease; }
+      .cta-line:hover span { transform: translateX(3px); }
+      .cta-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 0;
+        border-top: 1px solid var(--line);
+      }
+      .cta-chev { flex-shrink: 0; color: var(--accent); font-weight: 700; transition: transform 0.15s ease; }
+      .cta-row:hover .cta-chev { transform: translateX(3px); }
     `}</style>
   );
 }

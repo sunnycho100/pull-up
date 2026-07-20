@@ -102,9 +102,9 @@ export default function StepBasics({
                 inset: 0,
                 display: "grid",
                 placeItems: "center",
-                background: "rgba(255,255,255,0.7)",
+                background: "rgba(0,0,0,0.6)",
                 fontSize: 13,
-                color: "var(--ink-2)",
+                color: "var(--ink)",
               }}
             >
               Uploading…

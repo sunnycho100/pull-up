@@ -103,7 +103,7 @@ export default function StepPlans({
                   borderRadius: 12,
                   textAlign: "left",
                   border: on ? "1px solid var(--accent)" : "1px solid var(--line)",
-                  background: on ? "rgba(99,91,255,0.06)" : "var(--bg)",
+                  background: on ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "var(--bg)",
                   transition: "border-color 150ms ease-out, background 150ms ease-out",
                 }}
               >

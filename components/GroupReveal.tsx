@@ -112,15 +112,17 @@ export default function GroupReveal({
       <p
         style={{
           fontSize: 12,
-          color: "var(--ink-3)",
-          letterSpacing: "0.01em",
+          fontWeight: 600,
+          textTransform: "uppercase",
+          color: "var(--accent)",
+          letterSpacing: "0.08em",
           margin: 0,
         }}
       >
         {context}
       </p>
 
-      <h1 style={{ fontSize: 30, fontWeight: 700, margin: "10px 0 0" }}>
+      <h1 style={{ fontSize: 36, fontWeight: 800, letterSpacing: "-0.03em", margin: "10px 0 0" }}>
         Meet your table
       </h1>
       <p style={{ fontSize: 15, color: "var(--ink-2)", margin: "6px 0 0" }}>
@@ -128,17 +130,15 @@ export default function GroupReveal({
         {headcount} {headcount === 1 ? "person" : "people"}
       </p>
 
-      <div style={{ display: "grid", gap: 10, marginTop: 24 }}>
+      <div style={{ marginTop: 24, borderBottom: "1px solid var(--line)" }}>
         {members.map((m, i) => (
           <div
             key={m.userId}
             style={{
               display: "flex",
               gap: 12,
-              padding: 14,
-              background: "var(--surface)",
-              border: "1px solid var(--line)",
-              borderRadius: 16,
+              padding: "16px 0",
+              borderTop: "1px solid var(--line)",
               opacity: visible ? 1 : 0,
               transform: visible ? "translateY(0)" : "translateY(12px)",
               transition: animate
@@ -151,11 +151,11 @@ export default function GroupReveal({
               <img
                 src={m.photo_url}
                 alt={m.name ?? ""}
-                width={56}
-                height={56}
+                width={44}
+                height={44}
                 style={{
-                  width: 56,
-                  height: 56,
+                  width: 44,
+                  height: 44,
                   borderRadius: "50%",
                   objectFit: "cover",
                   flexShrink: 0,
@@ -164,16 +164,17 @@ export default function GroupReveal({
             ) : (
               <div
                 style={{
-                  width: 56,
-                  height: 56,
+                  width: 44,
+                  height: 44,
                   borderRadius: "50%",
                   flexShrink: 0,
-                  background: "var(--accent)",
-                  color: "var(--accent-ink)",
+                  background: "var(--surface)",
+                  border: "1px solid var(--line)",
+                  color: "var(--ink-2)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 18,
+                  fontSize: 15,
                   fontWeight: 600,
                 }}
               >
@@ -182,7 +183,7 @@ export default function GroupReveal({
             )}
 
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: 15, fontWeight: 600 }}>
+              <div style={{ fontSize: 16, fontWeight: 700 }}>
                 {m.name}
                 {(m.partySize ?? 1) > 1 && (
                   <span style={{ fontSize: 12, fontWeight: 600, color: "var(--accent)", marginLeft: 6 }}>
@@ -250,28 +251,21 @@ export default function GroupReveal({
       </div>
 
       {rationale && (
-        <div
-          style={{
-            marginTop: 20,
-            padding: 16,
-            background: "rgba(99,91,255,0.06)",
-            border: "1px solid rgba(99,91,255,0.28)",
-            borderRadius: 16,
-          }}
-        >
+        <div style={{ marginTop: 24 }}>
           <div
             style={{
               fontSize: 11,
               fontWeight: 700,
-              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
               color: "var(--accent)",
             }}
           >
-            WHY THIS TABLE
+            Why this table
           </div>
           <p
             style={{
-              fontSize: 14.5,
+              fontSize: 15,
               lineHeight: 1.5,
               color: "var(--ink-2)",
               margin: "8px 0 0",
@@ -285,10 +279,9 @@ export default function GroupReveal({
       {(suggestedPlace || meetTime) && (
         <div
           style={{
-            marginTop: 16,
-            padding: "14px 16px",
-            border: "1px solid var(--line)",
-            borderRadius: 16,
+            marginTop: 20,
+            paddingTop: 16,
+            borderTop: "1px solid var(--line)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -297,12 +290,30 @@ export default function GroupReveal({
         >
           {suggestedPlace && (
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: 600 }}>{suggestedPlace}</div>
-              <div style={{ fontSize: 12, color: "var(--ink-3)" }}>suggested spot</div>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  color: "var(--ink-3)",
+                }}
+              >
+                Suggested spot
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 600, marginTop: 3 }}>{suggestedPlace}</div>
             </div>
           )}
           {meetTime && (
-            <div style={{ fontSize: 15, fontWeight: 600, color: "var(--accent)", whiteSpace: "nowrap" }}>
+            <div
+              style={{
+                fontFamily: "var(--font-display), sans-serif",
+                fontSize: 20,
+                fontWeight: 700,
+                letterSpacing: "-0.02em",
+                whiteSpace: "nowrap",
+              }}
+            >
               {fmtTime(meetTime)}
             </div>
           )}
@@ -313,17 +324,17 @@ export default function GroupReveal({
         href={`/groups/${groupId}/chat`}
         style={{
           display: "block",
-          marginTop: 24,
+          marginTop: 28,
           padding: "15px 20px",
-          background: "var(--accent)",
-          color: "var(--accent-ink)",
-          borderRadius: 14,
+          border: "1px solid var(--accent)",
+          color: "var(--accent)",
+          borderRadius: 999,
           textAlign: "center",
           fontSize: 16,
-          fontWeight: 600,
+          fontWeight: 700,
         }}
       >
-        Open group chat
+        Open group chat ▸
       </Link>
     </section>
   );

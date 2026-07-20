@@ -106,20 +106,20 @@ export default function MealsList({
 
               {joined ? (
                 <button
-                  className="chip chip--in"
+                  className="act act--in"
                   onClick={() => setOpenId(slot.id)}
                   aria-label={`You're in ${slot.title}. Edit signup.`}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  Going
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M20 6 9 17l-5-5" />
                   </svg>
-                  You&apos;re in
                 </button>
               ) : closed ? (
-                <span className="chip chip--closed">Closed</span>
+                <span className="act act--closed">Closed</span>
               ) : (
-                <button className="btn-join" onClick={() => setOpenId(slot.id)}>
-                  Join
+                <button className="act act--join" onClick={() => setOpenId(slot.id)}>
+                  Join <span aria-hidden>▸</span>
                 </button>
               )}
             </div>
@@ -151,39 +151,24 @@ export default function MealsList({
           border-bottom: 1px solid var(--line);
         }
         .meal-row:last-child { border-bottom: none; }
-        .btn-join {
-          flex-shrink: 0;
-          border: none;
-          background: var(--accent);
-          color: var(--accent-ink);
-          font-size: 14px;
-          font-weight: 600;
-          padding: 9px 18px;
-          border-radius: 999px;
-          cursor: pointer;
-          transition: opacity 150ms ease-out;
-        }
-        .btn-join:active { opacity: 0.8; }
-        .chip {
+        .act {
           flex-shrink: 0;
           display: inline-flex;
           align-items: center;
           gap: 5px;
-          font-size: 14px;
-          font-weight: 600;
-          padding: 8px 14px;
-          border-radius: 999px;
+          min-height: 44px;
+          padding: 0 4px;
+          background: none;
           border: none;
+          font-size: 14px;
+          font-weight: 700;
+          white-space: nowrap;
         }
-        .chip--in {
-          background: rgba(99, 91, 255, 0.1);
-          color: var(--accent);
-          cursor: pointer;
-        }
-        .chip--closed {
-          background: var(--surface);
-          color: var(--ink-3);
-        }
+        .act--join { color: var(--accent); cursor: pointer; }
+        .act--join span { display: inline-block; transition: transform 0.15s ease; }
+        .act--join:hover span { transform: translateX(3px); }
+        .act--in { color: var(--accent); cursor: pointer; }
+        .act--closed { color: var(--ink-3); font-weight: 600; }
         .toast {
           position: fixed;
           left: 50%;
