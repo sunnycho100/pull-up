@@ -91,7 +91,7 @@ export default async function HomePage() {
     <section style={{ padding: "24px 20px" }}>
       <header style={{ marginBottom: 24 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="UKC Social" height={22} width={51} style={{ display: "block" }} />
+        <img src="/logo.png" alt="UKC Social" height={44} width={102} style={{ display: "block" }} />
         <div style={{ fontSize: 13, color: "var(--ink-2)", marginTop: 6 }}>
           {dateFmt.format(new Date(now))}
         </div>

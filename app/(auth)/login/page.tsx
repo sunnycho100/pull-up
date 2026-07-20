@@ -40,7 +40,7 @@ export default function LoginPage() {
       }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/logo.png" alt="UKC Social" height={40} width={93} style={{ display: "block" }} />
+      <img src="/logo.png" alt="UKC Social" height={80} width={186} style={{ display: "block" }} />
       <p style={{ color: "var(--ink-2)", marginTop: 12, fontSize: 16 }}>
         Find your table at UKC 2026 — dinners, rides, and people worth meeting.
       </p>
