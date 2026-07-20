@@ -46,17 +46,17 @@ optimal (no Hungarian) — good enough to validate scores; upgrade if pairings l
 
 ## 4. Suggest a group of 4 — `suggestGroups(assignments, people)`
 
-Fuse two matched pairs into a foursome (2 mentors + 2 mentees). Rank every pair-of-pairs by
+Fuse two matched pairs into a group (2 mentors + 2 mentees). Rank every pair-of-pairs by
 **affinity** = mean topic score across the 4 cross-combos (role-neutral — grouping is about shared
 field/vibe). Greedily merge; a pair with no distinct partner left stays a duo. Guard: never fuse
-two pairs that share a mentor (would make a 3-person "foursome").
+two pairs that share a mentor (would make a 3-person "group").
 
 ## Test-run findings (30 people, 15/15)
 
 - **1:1 pairs are healthy** — same-field 90–100%, same-field/different-area 70–81%.
 - **Grouping tail is weak** — greedy fusion strands mismatched leftovers (a CS pair got fused with a
   Data-Science pair at **6.8%**). Cross-field groups that are adjacent (ME+EE robotics) read fine.
-- **Open refinement:** add an affinity floor — below ~40%, don't force a foursome; leave the pairs
+- **Open refinement:** add an affinity floor — below ~40%, don't force a group; leave the pairs
   as 1:1 only. Cheap change in `suggestGroups`, do it if the low-affinity groups bother us.
 
 ## Not built yet (deferred on purpose)

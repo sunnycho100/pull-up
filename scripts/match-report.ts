@@ -57,7 +57,7 @@ for (const a of [...assignments].sort((x, y) => y.score - x.score)) {
 }
 writeFileSync(join(root, "data/match-pairs.csv"), csv(pairRows));
 
-// --- 3. suggested foursomes (two pairs fused) ---
+// --- 3. suggested groups (two pairs fused) ---
 const groups = suggestGroups(assignments, people);
 const groupRows: (string | number)[][] = [["group","size","affinity_%","members","fields"]];
 groups.forEach((g, i) => {

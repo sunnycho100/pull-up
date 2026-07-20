@@ -3,7 +3,7 @@
 // Pure + deterministic so it can be TDD'd and dumped to a CSV for tuning.
 //
 // Pipeline: classify → scorePair (every pair) → assignMentees (1:1, capped)
-//           → suggestGroups (fuse two pairs into a foursome).
+//           → suggestGroups (fuse two pairs into a group).
 
 export type Role = "undergrad" | "masters" | "phd" | "industry";
 
@@ -115,7 +115,7 @@ export function assignMentees(
 
 export type SuggestedGroup = { memberIds: string[]; affinity: number };
 
-// How well two matched pairs would mesh as a foursome: mean TOPIC score across the
+// How well two matched pairs would mesh as a group: mean TOPIC score across the
 // four cross-pair combos (role-neutral — grouping is about shared field/vibe, not mentorship).
 function groupAffinity(pairA: [Person, Person], pairB: [Person, Person]): number {
   const combos: [Person, Person][] = [
@@ -141,7 +141,7 @@ export function suggestGroups(assignments: Assignment[], people: Person[]): Sugg
   for (let i = 0; i < pairs.length; i++)
     for (let j = i + 1; j < pairs.length; j++) {
       // A capacity>1 mentor sits in several pairs; fusing two of them would make a
-      // "foursome" of only 3 distinct people. Only fuse pairs with no shared member.
+      // "group" of only 3 distinct people. Only fuse pairs with no shared member.
       const ids = new Set(pairs[i].members.map((p) => p.id));
       if (pairs[j].members.some((p) => ids.has(p.id))) continue;
       cand.push({ i, j, affinity: groupAffinity(pairs[i].members, pairs[j].members) });
