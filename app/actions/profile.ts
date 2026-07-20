@@ -6,6 +6,7 @@ type ProfileInput = Partial<{
   name: string;
   school: string;
   position: string;
+  birthday: string | null;
   interests: string[];
   bio: string;
   kakao: string;

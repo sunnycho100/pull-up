@@ -11,6 +11,7 @@ type Data = {
   name: string;
   school: string;
   position: string;
+  birthday: string;
   photo_url: string;
   interests: string[];
   slotIds: string[];
@@ -25,6 +26,7 @@ export default function OnboardingClient({ userId }: { userId: string }) {
     name: "",
     school: "",
     position: "",
+    birthday: "",
     photo_url: "",
     interests: [],
     slotIds: [],
@@ -95,6 +97,7 @@ export default function OnboardingClient({ userId }: { userId: string }) {
                 name: data.name.trim(),
                 school: data.school.trim(),
                 position: data.position.trim(),
+                birthday: data.birthday || null,
                 photo_url: data.photo_url,
               },
               2,

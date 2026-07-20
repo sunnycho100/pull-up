@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { downscale } from "@/lib/avatar";
 
-type Basics = { name: string; school: string; position: string; photo_url: string };
+type Basics = { name: string; school: string; position: string; birthday: string; photo_url: string };
 
 const field: React.CSSProperties = {
   width: "100%",
@@ -166,6 +166,16 @@ export default function StepBasics({
         value={value.position}
         onChange={(e) => onChange({ position: e.target.value })}
         placeholder="PhD student, Founder, …"
+      />
+      <label style={{ fontSize: 14, fontWeight: 600, marginTop: 16, display: "block" }}>
+        Birthday <span style={{ color: "var(--ink-3)", fontWeight: 400 }}>· optional</span>
+      </label>
+      <input
+        type="date"
+        style={{ ...field, colorScheme: "dark" }}
+        value={value.birthday}
+        max={new Date().toISOString().slice(0, 10)}
+        onChange={(e) => onChange({ birthday: e.target.value })}
       />
 
       {error && (
