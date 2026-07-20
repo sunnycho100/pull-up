@@ -1,20 +1,13 @@
-// Public demo of the mentor–mentee matching workflow over the 30 synthetic people.
-// Not wired to auth/DB on purpose — this is a visual test of lib/mentorMatch.ts.
-// View as a different person: /match-demo?me=<id>  (ids in data/synthetic-people.json)
-import Link from "next/link";
+// Internal preview of the mentor–mentee matching workflow (NOT a shipped user surface).
+// Shows what one person sees: the group they're introduced to — never the also-rans
+// (those live in data/match-*.csv for tuning). Preview as anyone: /match-demo?me=<id>.
 import raw from "@/data/synthetic-people.json";
-import {
-  type Person,
-  type PairScore,
-  classify,
-  scorePair,
-  assignMentees,
-  suggestGroups,
-} from "@/lib/mentorMatch";
+import { type Person, classify, assignMentees, suggestGroups } from "@/lib/mentorMatch";
+import ThemeToggle from "./ThemeToggle";
 
 const roster = raw as Person[];
 const byId = new Map(roster.map((p) => [p.id, p]));
-const pct = (n: number) => Math.round(n * 100);
+
 const roleLabel: Record<Person["role"], string> = {
   undergrad: "Undergrad",
   masters: "Master's",
@@ -22,20 +15,14 @@ const roleLabel: Record<Person["role"], string> = {
   industry: "Industry",
 };
 
-function sharedInterests(a: Person, b: Person) {
-  const bl = b.interests.map((x) => x.toLowerCase());
-  return a.interests.filter((i) => bl.includes(i.toLowerCase()));
+// Chip label without a leading honorific: "Dr. Sunghwan Jo" → "Sunghwan".
+function chipLabel(name: string) {
+  return name.replace(/^Dr\.?\s+/i, "").trim().split(/\s+/)[0] || name;
 }
 
-function why(me: Person, other: Person, s: PairScore) {
-  const bits: string[] = [];
-  if (s.field) bits.push("same field");
-  if (s.research === 1) bits.push("same research area");
-  else if (s.research === 0.5) bits.push("adjacent area");
-  const shared = sharedInterests(me, other);
-  if (shared.length) bits.push(`${shared.length} shared: ${shared.join(", ")}`);
-  if (s.crossSchool) bits.push("different school");
-  return bits.length ? bits.join(" · ") : "no overlap";
+function sharedWith(me: Person, other: Person) {
+  const mine = new Set(me.interests.map((x) => x.toLowerCase()));
+  return other.interests.filter((i) => mine.has(i.toLowerCase()));
 }
 
 export default async function MatchDemo({
@@ -45,140 +32,113 @@ export default async function MatchDemo({
 }) {
   const sp = await searchParams;
   const me = byId.get(sp.me ?? "") ?? byId.get("u01")!;
-  const iAmMentee = classify(me) === "mentee";
-
-  const others = roster
-    .filter((p) => p.id !== me.id)
-    .map((p) => ({ p, s: scorePair(me, p) }))
-    .sort((a, b) => b.s.total - a.s.total);
-  const topMatches = others.slice(0, 6);
 
   const assignments = assignMentees(roster);
-  const myPairs = assignments.filter((a) => a.menteeId === me.id || a.mentorId === me.id);
   const groups = suggestGroups(assignments, roster);
   const myGroup = groups.find((g) => g.memberIds.includes(me.id));
+  const members = (myGroup?.memberIds ?? [me.id])
+    .map((id) => byId.get(id)!)
+    .sort((a, b) => Number(b.id === me.id) - Number(a.id === me.id)); // you first
+
+  const mentors = members.filter((p) => classify(p) === "mentor").length;
+  const students = members.length - mentors;
+  const fields = [...new Set(members.map((p) => p.field))];
+
+  const subtitle =
+    members.length <= 2
+      ? "Your mentor for today. More of your people join as they arrive."
+      : `${mentors} ${mentors === 1 ? "mentor" : "mentors"} and ${students} ${
+          students === 1 ? "student" : "students"
+        } who work near what you do.`;
+  const themeLine =
+    fields.length === 1 ? `All in ${fields[0]}.` : `Across ${fields.join(" and ")}.`;
 
   return (
-    <main style={{ maxWidth: 430, margin: "0 auto", padding: "28px 20px 64px" }}>
-      {/* ── the Home promo card ("little ad") ── */}
-      <div className="promo">
-        <div className="kicker">Now open</div>
-        <h1 className="promo-title">Find your people</h1>
-        <p className="promo-sub">
-          {iAmMentee
-            ? "Mentors who share your field are here. See who lines up."
-            : "Students in your area want to meet. See who lines up."}
-        </p>
-        <span className="cta">See your matches ▸</span>
+    <main>
+      <div className="topbar">
+        <span className="topbar-tag">Preview</span>
+        <ThemeToggle />
       </div>
 
-      {/* ── view-as switcher (demo only) ── */}
-      <div className="switch">
-        <div className="switch-label">Viewing as</div>
-        <div className="chips">
-          {roster.map((p) => (
-            <Link
-              key={p.id}
-              href={`/match-demo?me=${p.id}`}
-              className={p.id === me.id ? "chip chip-on" : "chip"}
-            >
-              {p.name.split(" ")[0]}
-            </Link>
-          ))}
-        </div>
-        <div className="me-line">
-          <strong>{me.name}</strong> · {roleLabel[me.role]} · {me.field} / {me.researchArea} ·{" "}
-          {me.school}
-          <span className={iAmMentee ? "tag tag-mentee" : "tag tag-mentor"}>
-            {classify(me)}
-          </span>
-        </div>
-      </div>
-
-      {/* ── step 1: ranked matches ── */}
-      <section>
-        <div className="kicker">Your matches</div>
-        <h2 className="h2">Ranked by shared field, research &amp; interests</h2>
-        <div className="board">
-          {topMatches.map(({ p, s }) => (
-            <div key={p.id} className="row">
-              <div className="score">{pct(s.total)}%</div>
-              <div className="body">
-                <div className="name">
-                  {p.name}
-                  <span className={`pill pill-${s.pairType}`}>
-                    {s.pairType === "mentorship" ? classify(p) : "peer"}
-                  </span>
-                </div>
-                <div className="meta">
-                  {roleLabel[p.role]} · {p.field} / {p.researchArea}
-                </div>
-                <div className="why">{why(me, p, s)}</div>
-              </div>
+      <div className="page">
+        {/* ── what appears on Home (a real, tappable entry point) ── */}
+        <a href="#your-group" className="promo">
+          <div className="promo-text">
+            <div className="kicker">New today</div>
+            <div className="promo-head">Meet your group</div>
+            <div className="promo-sub">
+              A few people who work on what you work on. A new introduction every day.
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+          <span className="promo-chev" aria-hidden>▸</span>
+        </a>
 
-      {/* ── step 2: the 1:1 assignment ── */}
-      <section>
-        <div className="kicker">{iAmMentee ? "Your mentor" : "Your mentees"}</div>
-        {myPairs.length ? (
-          <div className="board">
-            {myPairs.map((a) => {
-              const otherId = iAmMentee ? a.mentorId : a.menteeId;
-              const o = byId.get(otherId)!;
+        {/* ── preview-as switcher (dev only) ── */}
+        <div className="switch">
+          <div className="switch-label">Preview as</div>
+          <div className="names">
+            {roster.map((p) => (
+              <a
+                key={p.id}
+                href={`/match-demo?me=${p.id}`}
+                className={p.id === me.id ? "pick pick-on" : "pick"}
+              >
+                {chipLabel(p.name)}
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* ── the group page it opens (what the user actually sees) ── */}
+        <section id="your-group" className="group">
+          <div className="kicker">Your group</div>
+          <h2 className="group-title">Meet your group</h2>
+          <p className="group-sub">{subtitle}</p>
+          <p className="group-theme">{themeLine}</p>
+
+          <div className="roster">
+            {members.map((p) => {
+              const isMe = p.id === me.id;
+              const isMentor = classify(p) === "mentor";
+              const shared = isMe ? [] : sharedWith(me, p);
               return (
-                <div key={otherId} className="row">
-                  <div className="score">{pct(a.score)}%</div>
-                  <div className="body">
-                    <div className="name">{o.name}</div>
-                    <div className="meta">
-                      {roleLabel[o.role]} · {o.field} / {o.researchArea} · {o.school}
-                    </div>
+                <div key={p.id} className="member">
+                  <div className="m-top">
+                    <span className="m-name">
+                      {isMentor && <span className="m-dot" aria-hidden />}
+                      {p.name}
+                      {isMe && <span className="m-you">you</span>}
+                    </span>
+                    <span className="m-role">{roleLabel[p.role]}</span>
                   </div>
+                  <div className="m-area">{p.researchArea}</div>
+                  <div className="m-field">{p.field}</div>
+                  {!isMe &&
+                    (shared.length > 0 ? (
+                      <div className="m-int">
+                        <span className="m-int-pre">you both like </span>
+                        <span className="m-int-hit">{shared.join(", ")}</span>
+                      </div>
+                    ) : p.interests.length > 0 ? (
+                      <div className="m-int m-int-muted">into {p.interests.join(", ")}</div>
+                    ) : null)}
                 </div>
               );
             })}
           </div>
-        ) : (
-          <p className="empty">No 1:1 match this round (mentor seats filled up).</p>
-        )}
-      </section>
 
-      {/* ── step 3: the suggested group of 4 ── */}
-      <section>
-        <div className="kicker">Your group</div>
-        <h2 className="h2">Two pairs, grouped to meet up</h2>
-        {myGroup ? (
-          <div className="group">
-            <div className="group-affinity">
-              {myGroup.memberIds.length === 4
-                ? `${pct(myGroup.affinity)}% group fit`
-                : "Waiting for a second pair"}
-            </div>
-            {myGroup.memberIds.map((id) => {
-              const p = byId.get(id)!;
-              return (
-                <div key={id} className={id === me.id ? "gm gm-me" : "gm"}>
-                  <span className="gm-name">
-                    {p.name}
-                    {id === me.id ? " (you)" : ""}
-                  </span>
-                  <span className="gm-role">{roleLabel[p.role]}</span>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="empty">Not grouped this round.</p>
-        )}
-      </section>
+          {members.length > 1 && (
+            <a href="#your-group" className="msg">
+              Message the group ▸
+            </a>
+          )}
+        </section>
 
-      <p className="foot">
-        Demo over {roster.length} synthetic people · algorithm in lib/mentorMatch.ts · not wired to
-        the live app yet
-      </p>
+        <p className="foot">
+          Internal preview over {roster.length} synthetic people. The algorithm lives in
+          lib/mentorMatch.ts; full rankings stay in data/match-report.csv, never shown to users.
+        </p>
+      </div>
       <Styles />
     </main>
   );
@@ -189,45 +149,75 @@ function Styles() {
     <style>{`
       main { color: var(--ink); }
       .kicker { font-size: 12px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); }
-      .h2 { font-family: var(--font-display); font-size: 19px; font-weight: 700; margin-top: 6px; margin-bottom: 14px; line-height: 1.15; }
-      section { margin-top: 34px; }
 
-      .promo { padding: 20px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
-      .promo-title { font-family: var(--font-display); font-size: 34px; font-weight: 800; letter-spacing: -0.03em; margin-top: 8px; line-height: 1; }
-      .promo-sub { color: var(--ink-2); font-size: 15px; margin-top: 10px; line-height: 1.45; }
-      .cta { display: inline-block; margin-top: 16px; font-size: 15px; font-weight: 700; color: var(--accent); }
+      .topbar {
+        position: sticky; top: 0; z-index: 20;
+        display: flex; align-items: center; justify-content: space-between;
+        max-width: 430px; margin: 0 auto; padding: 10px 20px;
+        background: color-mix(in srgb, var(--bg) 86%, transparent);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--line);
+      }
+      .topbar-tag { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
 
-      .switch { margin-top: 24px; }
-      .switch-label { font-size: 12px; color: var(--ink-3); margin-bottom: 8px; }
-      .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-      .chip { font-size: 12px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-2); }
-      .chip-on { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
-      .me-line { font-size: 13px; color: var(--ink-2); margin-top: 14px; line-height: 1.5; }
+      .page { max-width: 430px; margin: 0 auto; padding: 24px 20px 64px; }
 
-      .tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 7px; border-radius: 999px; margin-left: 8px; }
-      .tag-mentor { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
-      .tag-mentee { background: var(--surface); color: var(--ink-2); border: 1px solid var(--line); }
+      /* Home promo — editorial block bounded by hairlines, not a grey card */
+      .promo {
+        display: flex; align-items: center; gap: 16px;
+        padding: 20px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+        transition: opacity 0.15s ease;
+      }
+      .promo-text { min-width: 0; }
+      .promo-head { font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin-top: 6px; }
+      .promo-sub { color: var(--ink-2); font-size: 14px; margin-top: 6px; line-height: 1.5; }
+      .promo-chev { flex-shrink: 0; color: var(--accent); font-size: 20px; font-weight: 700; transition: transform 0.15s ease; }
+      .promo:hover .promo-chev { transform: translateX(4px); }
+      .promo:active { opacity: 0.7; }
 
-      .board { border-top: 1px solid var(--line); }
-      .row { display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: start; padding: 14px 0; border-bottom: 1px solid var(--line); }
-      .score { font-family: var(--font-display); font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--ink); letter-spacing: -0.02em; }
-      .name { font-size: 15px; font-weight: 700; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
-      .meta { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
-      .why { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+      /* Preview-as switcher — de-boxed to text links, active is persimmon underline */
+      .switch { margin-top: 32px; }
+      .switch-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); margin-bottom: 4px; }
+      .names { display: flex; flex-wrap: wrap; column-gap: 16px; }
+      .pick {
+        display: inline-flex; align-items: center; min-height: 44px;
+        font-size: 14px; color: var(--ink-2);
+        border-bottom: 2px solid transparent;
+        transition: color 0.12s ease;
+      }
+      .pick:hover { color: var(--ink); }
+      .pick-on { color: var(--accent); font-weight: 700; border-bottom-color: var(--accent); }
 
-      .pill { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 6px; border-radius: 999px; }
-      .pill-mentorship { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
-      .pill-peer { background: var(--surface); color: var(--ink-3); border: 1px solid var(--line); }
+      /* The group */
+      .group { margin-top: 48px; }
+      .group-title { font-family: var(--font-display); font-size: 32px; font-weight: 800; letter-spacing: -0.03em; margin-top: 6px; line-height: 1.02; }
+      .group-sub { font-size: 15px; color: var(--ink); margin-top: 14px; line-height: 1.5; }
+      .group-theme { font-size: 14px; color: var(--ink-2); margin-top: 4px; }
 
-      .group { margin-top: 4px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
-      .group-affinity { font-size: 12px; font-weight: 700; color: var(--accent); padding: 12px 16px; background: color-mix(in srgb, var(--accent) 7%, transparent); }
-      .gm { display: flex; justify-content: space-between; align-items: center; padding: 13px 16px; border-top: 1px solid var(--line); }
-      .gm-me { background: color-mix(in srgb, var(--accent) 6%, transparent); }
-      .gm-name { font-size: 15px; font-weight: 600; }
-      .gm-role { font-size: 12px; color: var(--ink-2); }
+      .roster { margin-top: 24px; }
+      .member { padding: 20px 0; border-top: 1px solid var(--line); }
+      .member:last-of-type { border-bottom: 1px solid var(--line); }
+      .m-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+      .m-name { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -0.01em; display: inline-flex; align-items: baseline; gap: 8px; min-width: 0; }
+      .m-dot { align-self: center; width: 7px; height: 7px; border-radius: 999px; background: var(--accent); flex-shrink: 0; }
+      .m-you { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
+      .m-role { flex-shrink: 0; font-size: 13px; color: var(--ink-3); }
+      .m-area { font-size: 15px; color: var(--ink-2); margin-top: 8px; }
+      .m-field { font-size: 13px; color: var(--ink-3); margin-top: 2px; }
+      .m-int { font-size: 14px; margin-top: 10px; }
+      .m-int-pre { color: var(--ink-3); }
+      .m-int-hit { color: var(--accent); font-weight: 600; }
+      .m-int-muted { color: var(--ink-3); }
 
-      .empty { font-size: 14px; color: var(--ink-3); margin-top: 6px; }
-      .foot { font-size: 11px; color: var(--ink-3); margin-top: 40px; line-height: 1.5; }
+      .msg {
+        display: inline-flex; align-items: center; min-height: 44px; margin-top: 24px;
+        font-size: 16px; font-weight: 700; color: var(--accent);
+        transition: opacity 0.15s ease;
+      }
+      .msg:hover { text-decoration: underline; text-underline-offset: 3px; }
+      .msg:active { opacity: 0.6; }
+
+      .foot { font-size: 11px; color: var(--ink-3); margin-top: 44px; line-height: 1.6; }
     `}</style>
   );
 }
