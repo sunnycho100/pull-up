@@ -1,41 +1,27 @@
 @import "tailwindcss";
 
+/* ── Night Arrivals ───────────────────────────────────────────────────────
+   Committed dark identity: deep ink-navy ground, one warm persimmon signal.
+   Persimmon appears ONLY on actions and state, never as decoration. */
 :root {
-  --bg: #ffffff;
-  --surface: #f7f8fa;
-  --line: #e6e8ee;
-  --ink: #0a2540;
-  --ink-2: #425466;
-  --ink-3: #596b80;
-  --accent: #635bff;
-  --accent-ink: #ffffff;
-  --danger: #b42318;
-  --overlay: rgba(10, 37, 64, 0.35);
-  --glass: rgba(255, 255, 255, 0.6);
-  --glass-solid: #ffffff;
-  --glass-line: rgba(10, 37, 64, 0.08);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b0f1a;
-    --surface: #151a27;
-    --line: #262d3d;
-    --ink: #f4f6fa;
-    --ink-2: #aeb8c7;
-    --ink-3: #8793a5;
-    --accent: #8b84ff;
-    --accent-ink: #0b0f1a;
-    --danger: #ff6b5e;
-    --overlay: rgba(0, 0, 0, 0.55);
-    --glass: rgba(15, 20, 32, 0.6);
-    --glass-solid: #0f1420;
-    --glass-line: rgba(255, 255, 255, 0.08);
-  }
+  --bg: #0e1420;
+  --surface: #161d2b;
+  --line: #232c3d;
+  --ink: #f2f5fa;
+  --ink-2: #9aa7bd;
+  --ink-3: #6b7893;
+  --accent: #ff6a3d;
+  --accent-ink: #1a0f08;
+  --danger: #ff5470;
+  --overlay: rgba(0, 0, 0, 0.62);
+  --glass: rgba(14, 20, 32, 0.72);
+  --glass-solid: #0e1420;
+  --glass-line: rgba(255, 255, 255, 0.08);
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
   color: var(--ink);
   background: var(--bg);
   -webkit-tap-highlight-color: transparent;
@@ -46,6 +32,7 @@ body {
 h1,
 h2,
 h3 {
+  font-family: var(--font-display), -apple-system, "Apple SD Gothic Neo", sans-serif;
   text-wrap: balance;
   letter-spacing: -0.02em;
 }

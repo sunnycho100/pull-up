@@ -25,15 +25,12 @@ export default async function RidesPage() {
     .sort((a, b) => +new Date(a.arrivalLocal) - +new Date(b.arrivalLocal));
 
   return (
-    <section style={{ padding: "24px 20px" }}>
-      <header style={{ marginBottom: 6 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 600 }}>Rides</h1>
-        <p style={{ color: "var(--ink-2)", marginTop: 6, fontSize: 15 }}>
-          See who&apos;s landing at MCO near your arrival, then share a car.
-        </p>
+    <section className="rides">
+      <header className="rides-head">
+        <p className="rides-kicker">MCO · Tue Aug 4 · Example</p>
+        <h1 className="rides-title">Arrivals</h1>
+        <p className="rides-sub">See who lands near you, then split a car into town.</p>
       </header>
-
-      <div className="rides-note">Example · Tue Aug 4 arrivals into Orlando (MCO)</div>
 
       {riders.length === 0 ? (
         <div className="rides-empty">
@@ -45,7 +42,7 @@ export default async function RidesPage() {
         </div>
       ) : (
         <>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 16 }}>
+          <div className="board">
             {riders.map((r) => (
               <RiderCard
                 key={r.id}
@@ -58,9 +55,7 @@ export default async function RidesPage() {
               />
             ))}
           </div>
-          <div style={{ marginTop: 16 }}>
-            <AddArrival />
-          </div>
+          <AddArrival />
         </>
       )}
 
@@ -72,128 +67,133 @@ export default async function RidesPage() {
 function RidesStyles() {
   return (
     <style>{`
-      .rides-note {
+      .rides { padding: 28px 20px 24px; }
+      .rides-head { margin-bottom: 22px; }
+      .rides-kicker {
         font-size: 12px;
         font-weight: 600;
-        letter-spacing: 0.02em;
-        color: var(--ink-3);
+        letter-spacing: 0.08em;
         text-transform: uppercase;
-      }
-      .rider {
-        border: 1px solid var(--line);
-        border-radius: 16px;
-        background: var(--surface);
-        overflow: hidden;
-      }
-      .rider-main {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 14px 16px;
-      }
-      .rider-glyph {
-        width: 38px;
-        height: 38px;
-        flex-shrink: 0;
-        border-radius: 12px;
-        background: color-mix(in srgb, var(--accent) 12%, transparent);
         color: var(--accent);
-        display: flex;
-        align-items: center;
-        justify-content: center;
       }
-      .rider-body { min-width: 0; flex: 1; }
-      .rider-lead {
+      .rides-title {
+        font-size: 40px;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        margin-top: 10px;
+      }
+      .rides-sub {
+        margin-top: 10px;
         font-size: 15px;
-        font-weight: 700;
-        color: var(--ink);
-        text-wrap: balance;
-      }
-      .rider-detail {
-        font-size: 13px;
         color: var(--ink-2);
-        margin-top: 2px;
-        text-wrap: pretty;
+        max-width: 34ch;
       }
-      .rider-btn {
-        flex-shrink: 0;
+
+      /* the arrivals board — hairline-divided rows, no cards */
+      .board { border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+      .arr { border-top: 1px solid var(--line); }
+      .arr-main {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        column-gap: 14px;
+        align-items: baseline;
+        padding: 16px 0;
+      }
+      .arr-time {
+        font-family: var(--font-display), sans-serif;
+        font-size: 21px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        white-space: nowrap;
+      }
+      .arr-body { min-width: 0; }
+      .arr-name { font-size: 16px; font-weight: 600; color: var(--ink); }
+      .arr-meta { font-size: 13px; color: var(--ink-2); margin-top: 3px; text-wrap: pretty; }
+      .arr-share {
+        align-self: center;
         min-height: 44px;
+        padding: 0 6px;
+        background: none;
         border: none;
-        border-radius: 999px;
-        padding: 0 18px;
-        background: var(--accent);
-        color: var(--accent-ink);
-        font-size: 13px;
-        font-weight: 600;
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 700;
+        white-space: nowrap;
         cursor: pointer;
-        transition: background 0.15s ease;
       }
-      .rider-btn:hover { background: color-mix(in srgb, var(--accent) 88%, #000); }
-      .rider-chip {
-        flex-shrink: 0;
+      .arr-share span { margin-left: 2px; display: inline-block; transition: transform 0.15s ease; }
+      .arr-share:hover span { transform: translateX(3px); }
+      .arr-done {
+        align-self: center;
+        min-height: 44px;
         display: inline-flex;
         align-items: center;
-        min-height: 44px;
-        padding: 0 14px;
-        border-radius: 999px;
-        border: 1px solid var(--line);
-        color: var(--ink-2);
         font-size: 13px;
         font-weight: 600;
+        color: var(--ink-2);
+        white-space: nowrap;
       }
-      .rider-ack {
+      .arr-ack {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding: 10px 16px;
-        border-top: 1px solid var(--line);
-        background: color-mix(in srgb, var(--accent) 7%, transparent);
+        margin: 0 0 14px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: color-mix(in srgb, var(--accent) 12%, transparent);
         font-size: 13px;
-        color: var(--ink-2);
+        color: var(--ink);
       }
-      .rider-undo {
+      .arr-undo {
         flex-shrink: 0;
+        min-height: 32px;
+        padding: 0 8px;
         background: none;
         border: none;
-        padding: 4px 6px;
         color: var(--accent);
         font-size: 13px;
         font-weight: 700;
         cursor: pointer;
       }
+
       .rides-empty {
-        margin-top: 40px;
+        margin-top: 48px;
         text-align: center;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 6px;
       }
-      .rides-empty-title { font-size: 16px; font-weight: 600; color: var(--ink); }
+      .rides-empty-title { font-family: var(--font-display), sans-serif; font-size: 18px; font-weight: 700; color: var(--ink); }
       .rides-empty-sub { font-size: 14px; color: var(--ink-2); max-width: 34ch; }
-      .add-arrival { display: flex; flex-direction: column; gap: 8px; }
+      .rides-empty .add-arrival { align-items: center; margin-top: 12px; }
+
+      .add-arrival { display: flex; flex-direction: column; gap: 10px; }
       .add-btn {
         align-self: flex-start;
         min-height: 44px;
         padding: 0 18px;
         border-radius: 999px;
-        border: 1px solid var(--line);
-        background: var(--bg);
-        color: var(--ink);
+        border: 1px solid var(--accent);
+        background: none;
+        color: var(--accent);
         font-size: 14px;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
+        transition: background 0.15s ease;
       }
-      .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+      .add-btn:hover { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+      .rides-empty .add-btn { align-self: center; }
       .add-note {
         font-size: 13px;
         color: var(--ink-2);
         max-width: 48ch;
         text-wrap: pretty;
       }
-      .rides-empty .add-arrival { align-items: center; margin-top: 8px; }
-      .rides-empty .add-btn { align-self: center; }
     `}</style>
   );
 }
