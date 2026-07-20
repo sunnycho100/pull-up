@@ -11,6 +11,27 @@
   --accent-ink: #ffffff;
   --danger: #b42318;
   --overlay: rgba(10, 37, 64, 0.35);
+  --glass: rgba(255, 255, 255, 0.6);
+  --glass-solid: #ffffff;
+  --glass-line: rgba(10, 37, 64, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0f1a;
+    --surface: #151a27;
+    --line: #262d3d;
+    --ink: #f4f6fa;
+    --ink-2: #aeb8c7;
+    --ink-3: #8793a5;
+    --accent: #8b84ff;
+    --accent-ink: #0b0f1a;
+    --danger: #ff6b5e;
+    --overlay: rgba(0, 0, 0, 0.55);
+    --glass: rgba(15, 20, 32, 0.6);
+    --glass-solid: #0f1420;
+    --glass-line: rgba(255, 255, 255, 0.08);
+  }
 }
 
 body {

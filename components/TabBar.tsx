@@ -86,10 +86,10 @@ export default function TabBar() {
           display: flex;
           justify-content: space-around;
           padding-bottom: env(safe-area-inset-bottom);
-          background: rgba(255, 255, 255, 0.6);
+          background: var(--glass);
           backdrop-filter: blur(20px) saturate(180%);
           -webkit-backdrop-filter: blur(20px) saturate(180%);
-          border-top: 1px solid rgba(10, 37, 64, 0.08);
+          border-top: 1px solid var(--glass-line);
         }
         .tabbar__item {
           flex: 1;
@@ -108,7 +108,7 @@ export default function TabBar() {
         }
         @media (prefers-reduced-transparency: reduce) {
           .tabbar {
-            background: #fff;
+            background: var(--glass-solid);
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
           }
