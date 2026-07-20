@@ -60,7 +60,7 @@ export function Board({ arrivals, departures }: { arrivals: Row[]; departures: R
         <>
           {mine && (
             <p className="board-hint">
-              Highlighted flights are within 30 min of yours — your best carpool.
+              Highlighted flights are within 30 min of yours, your best carpool.
             </p>
           )}
           <div className="board">

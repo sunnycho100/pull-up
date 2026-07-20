@@ -36,24 +36,13 @@ export default async function HomePage() {
   if (user.is_anonymous) return <GuestHomeSection />;
   const now = Date.now();
 
-  // mentor_optin may not exist yet (migration 0006 pending) — fall back to name-only.
-  let profileName = "";
-  let mentorOptedIn = false;
-  const full = await supabase
+  const { data: prof } = await supabase
     .from("profiles")
-    .select("name, mentor_optin")
+    .select("name")
     .eq("id", user.id)
     .maybeSingle();
-  if (full.error) {
-    const basic = await supabase.from("profiles").select("name").eq("id", user.id).maybeSingle();
-    if (!basic.data) redirect("/welcome");
-    profileName = basic.data.name ?? "";
-  } else {
-    if (!full.data) redirect("/welcome");
-    profileName = full.data.name ?? "";
-    mentorOptedIn = !!(full.data as { mentor_optin?: boolean }).mentor_optin;
-  }
-  const profile = { name: profileName };
+  if (!prof) redirect("/welcome");
+  const profile = { name: prof.name ?? "" };
 
   const { data: groupRows } = await supabase
     .from("group_members")
@@ -159,11 +148,7 @@ export default async function HomePage() {
         <Fresh name={profile.name} />
       )}
 
-      <FillInHub
-        dinner={dinnerDone ? null : dinnerHook}
-        mentorOptedIn={mentorOptedIn}
-        hasFlight={hasFlight}
-      />
+      <FillInHub dinner={dinnerDone ? null : dinnerHook} hasFlight={hasFlight} />
       <LinkStyles />
     </section>
   );
@@ -180,22 +165,25 @@ function Fresh({ name }: { name: string }) {
       <p style={{ color: "var(--ink-2)", marginTop: 12, fontSize: 15, maxWidth: "40ch" }}>
         Nothing on your plate yet. Here&apos;s how to get the most out of the week.
       </p>
-      <Link href="/people" className="text-link">
-        Or just browse who&apos;s here ▸
-      </Link>
     </div>
   );
 }
 
-// A persistent "things to line up" list. Shows only actions the user hasn't done,
-// each led by the concrete benefit — so Home stays a place to act, not just read.
+// Line-drawn icons, reused from the tab bar so Home speaks the same visual language.
+const ICONS = {
+  meal: "M6 3v7a2 2 0 0 0 2 2v9M6 3v5m3-5v5m9-5c-1.5 1-2.5 3-2.5 6.5V12h2.5m0-9v18",
+  people:
+    "M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 10.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M21 20v-1.5a4 4 0 0 0-3-3.9M16 3.6a4 4 0 0 1 0 7.8",
+  ride: "M5 16v3H3v-6l2-5a2 2 0 0 1 1.9-1.4h10.2A2 2 0 0 1 19 8l2 5v6h-2v-3H5m1.5-3.5h11M7 16h.5m9-.5h.5",
+};
+
+// A persistent "things to line up" list, each led by an icon and the concrete
+// payoff, so Home stays a place to act rather than a wall of text.
 function FillInHub({
   dinner,
-  mentorOptedIn,
   hasFlight,
 }: {
   dinner: { title: string; count: number } | null;
-  mentorOptedIn: boolean;
   hasFlight: boolean;
 }) {
   const rows: ReactNode[] = [];
@@ -203,32 +191,32 @@ function FillInHub({
   if (dinner) {
     const proof =
       dinner.count > 1
-        ? `${dinner.count} already in for ${dinner.title}. You'll be seated by what you actually work on, not at random.`
-        : `Get seated by what you actually work on for ${dinner.title} — come solo or bring your crew.`;
-    rows.push(<NudgeRow key="dinner" href="/meals" title="Grab a seat at dinner" benefit={proof} />);
-  }
-  if (!mentorOptedIn) {
+        ? `${dinner.count} already in for ${dinner.title}. Seated by what you actually work on.`
+        : "Seated by what you actually work on, not at random.";
     rows.push(
-      <NudgeRow
-        key="mentor"
-        href="/mentor"
-        title="Get matched one-on-one"
-        benefit="An hour with someone a step ahead on your path. We find them and make the intro."
-      />,
+      <NudgeRow key="dinner" href="/meals" icon={ICONS.meal} title="Grab a seat at dinner" benefit={proof} />,
     );
   }
+  rows.push(
+    <NudgeRow
+      key="people"
+      href="/people"
+      icon={ICONS.people}
+      title="Meet other participants"
+      benefit="See who's coming and reach out before you arrive."
+    />,
+  );
   if (!hasFlight) {
     rows.push(
       <NudgeRow
         key="rides"
         href="/rides/add"
+        icon={ICONS.ride}
         title="Split a ride from the airport"
-        benefit="A cab from the airport runs about $60 alone. Post your flight and share it — people landing in your window pay around $20 each."
+        benefit="$60 alone. About $20 each when you share."
       />,
     );
   }
-
-  if (!rows.length) return null;
 
   return (
     <div style={{ marginTop: 32 }}>
@@ -238,10 +226,34 @@ function FillInHub({
   );
 }
 
-function NudgeRow({ href, title, benefit }: { href: string; title: string; benefit: string }) {
+function NudgeRow({
+  href,
+  icon,
+  title,
+  benefit,
+}: {
+  href: string;
+  icon: string;
+  title: string;
+  benefit: string;
+}) {
   return (
     <Link href={href} className="cta-row">
-      <div style={{ minWidth: 0 }}>
+      <svg
+        className="cta-ico"
+        width="26"
+        height="26"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d={icon} />
+      </svg>
+      <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 17, fontWeight: 700, color: "var(--ink)" }}>{title}</div>
         <div style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 4, textWrap: "pretty" }}>
           {benefit}
@@ -369,9 +381,9 @@ function GuestHomeSection() {
       <div style={{ marginTop: 28 }}>
         <div className="hub-head">Members can</div>
         <div className="hub-list">
-          <NudgeRow href="/login" title="Join a dinner" benefit="Get seated with people matched to what you actually work on." />
-          <NudgeRow href="/login" title="Get matched one-on-one" benefit="An hour with someone a step ahead on your path." />
-          <NudgeRow href="/login" title="Split a ride from the airport" benefit="About $20 each with your window instead of ~$60 alone." />
+          <NudgeRow href="/login" icon={ICONS.meal} title="Join a dinner" benefit="Seated with people matched to what you actually work on." />
+          <NudgeRow href="/login" icon={ICONS.people} title="Meet other participants" benefit="See who's coming before you arrive." />
+          <NudgeRow href="/login" icon={ICONS.ride} title="Split a ride from the airport" benefit="$60 alone. About $20 each when you share." />
         </div>
       </div>
       <Link
@@ -428,11 +440,11 @@ function LinkStyles() {
       .cta-row {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 16px;
+        gap: 14px;
         padding: 18px 0;
         border-top: 1px solid var(--line);
       }
+      .cta-ico { flex-shrink: 0; color: var(--ink-2); }
       .cta-chev { flex-shrink: 0; color: var(--accent); font-weight: 700; transition: transform 0.15s ease; }
       .cta-row:hover .cta-chev { transform: translateX(3px); }
       .hub-head {

@@ -84,8 +84,8 @@ export default async function AddFlightPage({
         Add your flight
       </h1>
       <p style={{ marginTop: 12, fontSize: 15, color: "var(--ink-2)", maxWidth: "42ch" }}>
-        Post it once and everyone landing in your window can split a car — a solo cab
-        runs about $60, shared it&apos;s closer to $20 each.
+        Post it once and everyone landing in your window can split a car. Alone it&apos;s
+        about $60; shared it&apos;s closer to $20 each.
       </p>
 
       <AddFlightForm initial={initial} />

@@ -121,13 +121,13 @@ export function AddFlightForm({ initial }: { initial?: Partial<Fields> }) {
         style={{ display: "none" }}
       />
       {scan === "no_key" && (
-        <p className="ff-scan-note">Screenshot reading isn&apos;t switched on yet — type it in below.</p>
+        <p className="ff-scan-note">Screenshot reading isn&apos;t switched on yet. Type it in below.</p>
       )}
       {scan === "done" && (
-        <p className="ff-scan-note ff-ok">Filled from your screenshot — give it a check.</p>
+        <p className="ff-scan-note ff-ok">Filled from your screenshot. Give it a check.</p>
       )}
       {scan === "error" && (
-        <p className="ff-scan-note">Couldn&apos;t read that one — type it in below.</p>
+        <p className="ff-scan-note">Couldn&apos;t read that one. Type it in below.</p>
       )}
 
       <label className="ff-field">

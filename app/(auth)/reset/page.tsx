@@ -60,7 +60,7 @@ export default function ResetPage() {
         <>
           <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em" }}>Set a new password</h1>
           <p style={{ color: "var(--ink-2)", marginTop: 8, fontSize: 15 }}>
-            Pick something you&apos;ll remember — at least 6 characters.
+            Pick something you&apos;ll remember. At least 6 characters.
           </p>
           <form onSubmit={submit} style={{ marginTop: 22 }}>
             <input

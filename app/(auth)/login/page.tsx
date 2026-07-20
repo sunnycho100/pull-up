@@ -10,11 +10,11 @@ type Mode = "signin" | "signup";
 function friendly(msg: string): string {
   const m = msg.toLowerCase();
   if (m.includes("provider is not enabled") || m.includes("unsupported provider"))
-    return "Google sign-in isn't switched on yet — use email for now.";
-  if (m.includes("anonymous")) return "Guest mode isn't switched on yet — sign in with email.";
+    return "Google sign-in isn't switched on yet. Use email for now.";
+  if (m.includes("anonymous")) return "Guest mode isn't switched on yet. Sign in with email.";
   if (m.includes("invalid login credentials")) return "That email and password don't match.";
-  if (m.includes("email not confirmed")) return "Confirm your email first — check your inbox.";
-  if (m.includes("already registered")) return "That email already has an account — sign in instead.";
+  if (m.includes("email not confirmed")) return "Confirm your email first. Check your inbox.";
+  if (m.includes("already registered")) return "That email already has an account. Sign in instead.";
   return msg;
 }
 
@@ -28,7 +28,7 @@ function LoginInner() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState<null | "email" | "google" | "guest">(null);
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState(params.get("error") === "auth" ? "That link didn't work — try again." : "");
+  const [error, setError] = useState(params.get("error") === "auth" ? "That link didn't work. Try again." : "");
 
   async function withGoogle() {
     setBusy("google");
@@ -76,7 +76,7 @@ function LoginInner() {
       // so we don't show a dead-end "check your inbox" for an existing account.
       if (data.user && (data.user.identities?.length ?? 0) === 0) {
         setMode("signin");
-        return setError("That email already has an account — sign in below.");
+        return setError("That email already has an account. Sign in below.");
       }
       // Confirmation required → no session yet.
       if (!data.session) return setSent(true);

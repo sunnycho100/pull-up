@@ -77,8 +77,8 @@ export default async function MentorPage() {
 
       <p style={{ marginTop: 14, fontSize: 16, color: "var(--ink-2)", lineHeight: 1.5, maxWidth: "44ch" }}>
         {isMentor
-          ? "Bring someone up. We match you with a student who's where you were — and make the intro so it isn't on either of you to reach out cold."
-          : "Get an hour with someone a step ahead on the path you're on. No cold DMs — we find the person and make the intro for you."}
+          ? "Bring someone up. We match you with a student who's where you were, and make the intro so it isn't on either of you to reach out cold."
+          : "Get an hour with someone a step ahead on the path you're on. No cold DMs. We find the person and make the intro for you."}
       </p>
 
       <div className="mx-role">

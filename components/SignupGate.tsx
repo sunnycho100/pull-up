@@ -11,7 +11,7 @@ export default function SignupGate({ title, blurb }: { title: string; blurb: str
         {title}
       </h1>
       <p style={{ marginTop: 12, fontSize: 15, color: "var(--ink-2)", lineHeight: 1.5, maxWidth: "40ch" }}>
-        {blurb} Creating an account takes a few seconds — you can keep looking around either way.
+        {blurb} Creating an account takes a few seconds. You can keep looking around either way.
       </p>
       <Link
         href="/login"
