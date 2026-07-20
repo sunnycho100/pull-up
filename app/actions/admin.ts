@@ -9,6 +9,7 @@ import {
   type SignupProfile,
   type MatchGroup,
 } from "@/lib/matching";
+import { nameGroups } from "@/lib/groupName";
 
 type Result = { ok: boolean; groups?: number; flex?: boolean; error?: string };
 
@@ -72,6 +73,13 @@ export async function runMatching(slotId: string): Promise<Result> {
   if (!validateAssignment(signups.map((s) => s.userId), groups, 4, 6, sizes).ok)
     groups = roundRobinGroups(signups);
 
+  // Name each table from the identity bank (data/group-names.json), not "Table N".
+  // Uses each member's interests + position to pick a fitting playful name, deduped per slot.
+  const profileMap = new Map(
+    signups.map((s) => [s.userId, { interests: s.interests, position: s.position }]),
+  );
+  const names = nameGroups(groups, profileMap);
+
   // Idempotent: wipe prior groups for this slot (cascade drops group_members).
   const { error: delErr } = await svc.from("groups").delete().eq("slot_id", slotId);
   if (delErr) return { ok: false, error: delErr.message };
@@ -79,9 +87,9 @@ export async function runMatching(slotId: string): Promise<Result> {
   const { data: inserted, error: gErr } = await svc
     .from("groups")
     .insert(
-      groups.map((g) => ({
+      groups.map((g, i) => ({
         slot_id: slotId,
-        name: g.name,
+        name: names[i],
         rationale: g.rationale,
         suggested_place: g.suggestedPlace,
         meet_time: slot.starts_at,

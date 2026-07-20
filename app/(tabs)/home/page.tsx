@@ -184,7 +184,7 @@ function Revealed({ group, names }: { group: Group; names: string[] }) {
         {group.name}
       </h1>
       {names.length > 0 && (
-        <p style={{ fontSize: 15, color: "var(--ink-2)", marginTop: 12 }}>{names.join(" · ")}</p>
+        <p style={{ fontSize: 15, color: "var(--ink-2)", marginTop: 12 }}>{names.join(", ")}</p>
       )}
       {group.suggested_place && (
         <p style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 6 }}>📍 {group.suggested_place}</p>
