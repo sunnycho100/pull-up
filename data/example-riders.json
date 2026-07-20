@@ -1,0 +1,32 @@
+{
+  "note": "EXAMPLE riders for the Rides demo — synthetic people/flights. Real data comes from attendee onboarding once wired up.",
+  "riders": [
+    {
+      "id": "r1",
+      "name": "Minjun",
+      "originCity": "Chicago",
+      "originIata": "ORD",
+      "flightNumber": "UA1523",
+      "airline": "United",
+      "arrivalLocal": "2026-08-04T17:10:00-04:00"
+    },
+    {
+      "id": "r2",
+      "name": "Sarah",
+      "originCity": "New York",
+      "originIata": "JFK",
+      "flightNumber": "DL2410",
+      "airline": "Delta",
+      "arrivalLocal": "2026-08-04T17:35:00-04:00"
+    },
+    {
+      "id": "r3",
+      "name": "Daniel",
+      "originCity": "Austin",
+      "originIata": "AUS",
+      "flightNumber": "WN988",
+      "airline": "Southwest",
+      "arrivalLocal": "2026-08-04T18:20:00-04:00"
+    }
+  ]
+}

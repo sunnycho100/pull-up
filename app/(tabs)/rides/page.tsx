@@ -1,4 +1,14 @@
-import { fetchArrivals, bucketIntoPools, delayMinutes, type Arrival } from "@/lib/flights";
+import ridersData from "@/data/example-riders.json";
+
+type Rider = {
+  id: string;
+  name: string;
+  originCity: string;
+  originIata: string;
+  flightNumber: string;
+  airline: string;
+  arrivalLocal: string;
+};
 
 const timeFmt = new Intl.DateTimeFormat("en-US", {
   hour: "numeric",
@@ -8,47 +18,24 @@ const timeFmt = new Intl.DateTimeFormat("en-US", {
 const fmt = (iso: string) => timeFmt.format(new Date(iso));
 
 export default async function RidesPage() {
-  // Evening arrivals into Orlando (MCO) the day before UKC 2026 — the band when most
-  // attendees land. Live once AERODATABOX_API_KEY is set; the seed keeps it working offline.
-  const arrivals = await fetchArrivals("MCO", "2026-08-04T17:00", "2026-08-04T19:00");
-  const pools = bucketIntoPools(arrivals, 30);
-  const live = !!process.env.AERODATABOX_API_KEY;
+  const riders = (ridersData.riders as Rider[])
+    .slice()
+    .sort((a, b) => +new Date(a.arrivalLocal) - +new Date(b.arrivalLocal));
 
   return (
     <section style={{ padding: "24px 20px" }}>
       <header style={{ marginBottom: 6 }}>
         <h1 style={{ fontSize: 28, fontWeight: 600 }}>Rides</h1>
         <p style={{ color: "var(--ink-2)", marginTop: 6, fontSize: 15 }}>
-          Share a car from MCO — we group people landing around the same time.
+          See who&apos;s landing at MCO around your time — start a group and split the car.
         </p>
       </header>
 
-      <div className="rides-note">
-        {live ? "Live · " : "Example · "}Tue Aug 4 arrivals into Orlando (MCO)
-      </div>
+      <div className="rides-note">Example · Tue Aug 4 arrivals into Orlando (MCO)</div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 16 }}>
-        {pools.map((pool) => (
-          <div key={pool.windowStart} className="pool">
-            <div className="pool-head">
-              <span className="pool-time">
-                {fmt(pool.windowStart)} – {fmt(pool.windowEnd)}
-              </span>
-              <span className="pool-count">
-                {pool.arrivals.length} {pool.arrivals.length === 1 ? "arrival" : "arrivals"}
-              </span>
-            </div>
-            <div>
-              {pool.arrivals.map((a) => (
-                <FlightRow key={a.flightNumber} a={a} />
-              ))}
-            </div>
-            {pool.arrivals.length > 1 && (
-              <div className="pool-cta">
-                {pool.arrivals.length} landing here · ~${Math.round(55 / Math.min(4, pool.arrivals.length))} each in a shared car
-              </div>
-            )}
-          </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 16 }}>
+        {riders.map((r) => (
+          <RiderCard key={r.id} r={r} />
         ))}
       </div>
 
@@ -57,23 +44,24 @@ export default async function RidesPage() {
   );
 }
 
-function FlightRow({ a }: { a: Arrival }) {
-  const delay = delayMinutes(a);
+function RiderCard({ r }: { r: Rider }) {
   return (
-    <div className="flight">
-      <div style={{ minWidth: 0 }}>
-        <div className="flight-top">
-          <span className="flight-no">{a.flightNumber}</span>
-          <span className="flight-origin">{a.originCity}</span>
+    <div className="rider">
+      <div className="rider-top">
+        <div className="rider-avatar">{r.name[0]}</div>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div className="rider-name">{r.name}</div>
+          <div className="rider-flight">
+            {r.originCity} → MCO · {r.airline} {r.flightNumber}
+          </div>
         </div>
-        <div className="flight-sub">
-          {a.airline}
-          {a.terminal ? ` · Terminal ${a.terminal}` : ""}
-        </div>
+        <div className="rider-time">{fmt(r.arrivalLocal)}</div>
       </div>
-      <div style={{ textAlign: "right", flexShrink: 0 }}>
-        <div className="flight-time">{fmt(a.estimatedLocal)}</div>
-        {delay > 0 && <div className="flight-delay">+{delay}m late</div>}
+      <div className="rider-cta">
+        <span>{r.name} is looking for a ride around {fmt(r.arrivalLocal)}</span>
+        <button className="rider-join" type="button">
+          Add to group
+        </button>
       </div>
     </div>
   );
@@ -89,51 +77,66 @@ function RidesStyles() {
         color: var(--ink-3);
         text-transform: uppercase;
       }
-      .pool {
+      .rider {
         border: 1px solid var(--line);
         border-radius: 16px;
         padding: 14px 16px;
         background: var(--surface);
       }
-      .pool-head {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 6px;
-      }
-      .pool-time { font-size: 16px; font-weight: 700; color: var(--ink); }
-      .pool-count { font-size: 13px; color: var(--ink-2); }
-      .flight {
+      .rider-top {
         display: flex;
         align-items: center;
-        justify-content: space-between;
         gap: 12px;
-        padding: 10px 0;
-        border-top: 1px solid var(--line);
       }
-      .flight-top { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
-      .flight-no {
-        font-variant-numeric: tabular-nums;
+      .rider-avatar {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        border-radius: 999px;
+        background: var(--accent);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-weight: 700;
-        font-size: 14px;
-        color: var(--accent);
+        font-size: 17px;
       }
-      .flight-origin {
-        font-size: 14px;
-        color: var(--ink);
+      .rider-name { font-size: 16px; font-weight: 700; color: var(--ink); }
+      .rider-flight {
+        font-size: 13px;
+        color: var(--ink-2);
+        margin-top: 2px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .flight-sub { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
-      .flight-time { font-size: 15px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
-      .flight-delay { font-size: 12px; font-weight: 600; color: var(--danger); margin-top: 1px; }
-      .pool-cta {
-        margin-top: 10px;
+      .rider-time {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+        flex-shrink: 0;
+      }
+      .rider-cta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+      }
+      .rider-cta > span { font-size: 13px; color: var(--ink-2); }
+      .rider-join {
+        flex-shrink: 0;
+        border: none;
+        border-radius: 999px;
+        padding: 8px 16px;
+        background: var(--accent);
+        color: #fff;
         font-size: 13px;
         font-weight: 600;
-        color: var(--accent);
+        cursor: pointer;
       }
     `}</style>
   );
