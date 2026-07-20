@@ -71,6 +71,13 @@ function LoginInner() {
       });
       setBusy(null);
       if (error) return setError(friendly(error.message));
+      // Anti-enumeration: signing up an email that already exists returns a
+      // decoy user with an empty identities array and sends no mail. Catch it
+      // so we don't show a dead-end "check your inbox" for an existing account.
+      if (data.user && (data.user.identities?.length ?? 0) === 0) {
+        setMode("signin");
+        return setError("That email already has an account — sign in below.");
+      }
       // Confirmation required → no session yet.
       if (!data.session) return setSent(true);
       router.push("/welcome");
