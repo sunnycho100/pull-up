@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/supabase/server";
@@ -34,12 +35,24 @@ export default async function HomePage() {
   const { user, supabase } = await requireUser();
   const now = Date.now();
 
-  const { data: profile } = await supabase
+  // mentor_optin may not exist yet (migration 0006 pending) — fall back to name-only.
+  let profileName = "";
+  let mentorOptedIn = false;
+  const full = await supabase
     .from("profiles")
-    .select("name")
+    .select("name, mentor_optin")
     .eq("id", user.id)
     .maybeSingle();
-  if (!profile) redirect("/welcome");
+  if (full.error) {
+    const basic = await supabase.from("profiles").select("name").eq("id", user.id).maybeSingle();
+    if (!basic.data) redirect("/welcome");
+    profileName = basic.data.name ?? "";
+  } else {
+    if (!full.data) redirect("/welcome");
+    profileName = full.data.name ?? "";
+    mentorOptedIn = !!(full.data as { mentor_optin?: boolean }).mentor_optin;
+  }
+  const profile = { name: profileName };
 
   const { data: groupRows } = await supabase
     .from("group_members")
@@ -97,6 +110,34 @@ export default async function HomePage() {
 
   const dayOf = nextGroup && ms(nextGroup.slot!.starts_at) - now <= 3 * HOUR;
 
+  // --- "Line these up" hub signals (each resilient to the pending migration) ---
+  const dinnerDone = !!nextGroup || !!nextSignup;
+
+  // Social proof for the dinner nudge: the soonest still-open meal you're not in.
+  let dinnerHook: { title: string; count: number } | null = null;
+  if (!dinnerDone) {
+    const { data: openSlots } = await supabase
+      .from("slots")
+      .select("id, title")
+      .eq("kind", "meal")
+      .gte("join_deadline", new Date(now).toISOString())
+      .order("starts_at", { ascending: true })
+      .limit(1);
+    const s = openSlots?.[0] as { id: string; title: string } | undefined;
+    if (s) {
+      const { count } = await supabase
+        .from("signups")
+        .select("*", { count: "exact", head: true })
+        .eq("slot_id", s.id);
+      dinnerHook = { title: s.title, count: count ?? 0 };
+    }
+  }
+
+  // Has the user posted a flight? (flights table may not exist yet → nudge shows.)
+  let hasFlight = false;
+  const fl = await supabase.from("flights").select("id").eq("user_id", user.id).limit(1);
+  if (!fl.error && fl.data && fl.data.length) hasFlight = true;
+
   return (
     <section style={{ padding: "24px 20px" }}>
       <header style={{ marginBottom: 24 }}>
@@ -116,6 +157,12 @@ export default async function HomePage() {
       ) : (
         <Fresh name={profile.name} />
       )}
+
+      <FillInHub
+        dinner={dinnerDone ? null : dinnerHook}
+        mentorOptedIn={mentorOptedIn}
+        hasFlight={hasFlight}
+      />
       <LinkStyles />
     </section>
   );
@@ -129,31 +176,75 @@ function Fresh({ name }: { name: string }) {
       <h1 style={{ fontSize: 40, fontWeight: 800, letterSpacing: "-0.03em", marginTop: 10, lineHeight: 1 }}>
         {greeting}
       </h1>
-      <p style={{ color: "var(--ink-2)", marginTop: 12, fontSize: 15 }}>
-        Nothing on your plate yet. Let&apos;s find your people for tonight.
+      <p style={{ color: "var(--ink-2)", marginTop: 12, fontSize: 15, maxWidth: "40ch" }}>
+        Nothing on your plate yet. Here&apos;s how to get the most out of the week.
       </p>
-      <div style={{ marginTop: 24, borderBottom: "1px solid var(--line)" }}>
-        <CtaCard
-          href="/meals"
-          title="Find your table"
-          sub="Join a dinner and get matched by interests. Come solo or bring your crew."
-        />
-        <CtaCard
-          href="/people"
-          title="See who's here"
-          sub="Browse everyone at UKC 2026 and find people worth meeting."
-        />
-      </div>
+      <Link href="/people" className="text-link">
+        Or just browse who&apos;s here ▸
+      </Link>
     </div>
   );
 }
 
-function CtaCard({ href, title, sub }: { href: string; title: string; sub: string }) {
+// A persistent "things to line up" list. Shows only actions the user hasn't done,
+// each led by the concrete benefit — so Home stays a place to act, not just read.
+function FillInHub({
+  dinner,
+  mentorOptedIn,
+  hasFlight,
+}: {
+  dinner: { title: string; count: number } | null;
+  mentorOptedIn: boolean;
+  hasFlight: boolean;
+}) {
+  const rows: ReactNode[] = [];
+
+  if (dinner) {
+    const proof =
+      dinner.count > 1
+        ? `${dinner.count} already in for ${dinner.title}. You'll be seated by what you actually work on, not at random.`
+        : `Get seated by what you actually work on for ${dinner.title} — come solo or bring your crew.`;
+    rows.push(<NudgeRow key="dinner" href="/meals" title="Grab a seat at dinner" benefit={proof} />);
+  }
+  if (!mentorOptedIn) {
+    rows.push(
+      <NudgeRow
+        key="mentor"
+        href="/mentor"
+        title="Get matched one-on-one"
+        benefit="An hour with someone a step ahead on your path. We find them and make the intro."
+      />,
+    );
+  }
+  if (!hasFlight) {
+    rows.push(
+      <NudgeRow
+        key="rides"
+        href="/rides/add"
+        title="Split a ride from the airport"
+        benefit="A cab from the airport runs about $60 alone. Post your flight and share it — people landing in your window pay around $20 each."
+      />,
+    );
+  }
+
+  if (!rows.length) return null;
+
+  return (
+    <div style={{ marginTop: 32 }}>
+      <div className="hub-head">Line these up</div>
+      <div className="hub-list">{rows}</div>
+    </div>
+  );
+}
+
+function NudgeRow({ href, title, benefit }: { href: string; title: string; benefit: string }) {
   return (
     <Link href={href} className="cta-row">
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 18, fontWeight: 700, color: "var(--ink)" }}>{title}</div>
-        <div style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 4 }}>{sub}</div>
+        <div style={{ fontSize: 17, fontWeight: 700, color: "var(--ink)" }}>{title}</div>
+        <div style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 4, textWrap: "pretty" }}>
+          {benefit}
+        </div>
       </div>
       <span className="cta-chev" aria-hidden>▸</span>
     </Link>
@@ -302,6 +393,13 @@ function LinkStyles() {
       }
       .cta-chev { flex-shrink: 0; color: var(--accent); font-weight: 700; transition: transform 0.15s ease; }
       .cta-row:hover .cta-chev { transform: translateX(3px); }
+      .hub-head {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink-3);
+        margin-bottom: 2px;
+      }
+      .hub-list { border-bottom: 1px solid var(--line); }
     `}</style>
   );
 }
