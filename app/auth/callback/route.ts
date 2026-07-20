@@ -7,6 +7,9 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
+  // Where to send the user after auth. Password-reset links pass ?next=/reset so
+  // they land on the set-new-password screen instead of home.
+  const next = searchParams.get("next");
 
   const supabase = await createServerSupabase();
 
@@ -27,6 +30,10 @@ export async function GET(request: Request) {
       data: { user },
     } = await supabase.auth.getUser();
     if (user) {
+      // Recovery links always go to the reset screen.
+      if (next || type === "recovery") {
+        return NextResponse.redirect(`${origin}${next ?? "/reset"}`);
+      }
       const { data: profile } = await supabase
         .from("profiles")
         .select("id")
