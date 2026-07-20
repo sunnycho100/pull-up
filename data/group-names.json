@@ -1,0 +1,11 @@
+{
+  "engineering": ["Engi Fam", "The Builders", "Torque Squad", "Circuit Breakers", "Load-Bearing"],
+  "cs_data": ["Model Citizens", "Latent Space", "The Compilers", "Overfit Club", "Null & Void"],
+  "bio_chem": ["Petri Party", "Helix House", "The Cultures", "Lab Fam"],
+  "mixed": ["Cross-Pollinators", "The Bridge", "Sundry Crew", "Loose Coupling"],
+  "vibe": {
+    "climbing": ["Send It", "Base Camp"],
+    "coffee": ["The Grind", "Cold Brew Crew"],
+    "startups": ["Founder Mode"]
+  }
+}
