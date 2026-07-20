@@ -156,7 +156,7 @@ export default function StepBasics({
         style={field}
         value={value.school}
         onChange={(e) => onChange({ school: e.target.value })}
-        placeholder="KAIST, Stanford, …"
+        placeholder="Enter here"
       />
       <label style={{ fontSize: 14, fontWeight: 600, marginTop: 16, display: "block" }}>
         Position
@@ -165,7 +165,7 @@ export default function StepBasics({
         style={field}
         value={value.position}
         onChange={(e) => onChange({ position: e.target.value })}
-        placeholder="PhD student, Founder, …"
+        placeholder="PhD, Software Engineer, …"
       />
       <label style={{ fontSize: 14, fontWeight: 600, marginTop: 16, display: "block" }}>
         Birthday <span style={{ color: "var(--ink-3)", fontWeight: 400 }}>· optional</span>

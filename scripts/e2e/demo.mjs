@@ -53,9 +53,9 @@ async function main() {
     log("Onboarding · basics");
     await hero.getByPlaceholder("이름 / Your name").fill("Sunny Demo");
     await pause(700);
-    await hero.getByPlaceholder("KAIST, Stanford, …").fill("UW–Madison");
+    await hero.getByPlaceholder("Enter here").fill("UW–Madison");
     await pause(700);
-    await hero.getByPlaceholder("PhD student, Founder, …").fill("PhD student");
+    await hero.getByPlaceholder("PhD, Software Engineer, …").fill("PhD student");
     await pause(700);
     await hero.getByRole("button", { name: "Continue" }).click();
     await pause();
