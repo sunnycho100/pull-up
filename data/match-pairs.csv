@@ -1,0 +1,16 @@
+mentee_id,mentee,mentor_id,mentor,field_match,score_%
+u04,Ethan Cho,i03,Peter Song,same,100.0
+u05,Hannah Seo,i04,Sophie Jeon,same,100.0
+u06,Noah Jang,i05,Mark Yoo,same,100.0
+m01,Minseo Kang,p01,Dr. Sunghwan Jo,same,100.0
+u01,Jiwon Park,p01,Dr. Sunghwan Jo,same,90.0
+u02,Daniel Kim,i01,James Cho,same,90.0
+u07,Sophia Yoon,i06,Irene Ha,same,90.0
+u08,Lucas Han,p08,Somin Baek,same,90.0
+m02,Brian Oh,p02,Jisoo Nam,same,90.0
+m04,Kevin Lim,i03,Peter Song,same,90.0
+m05,Rachel Bae,p09,Hyun Woo Ji,same,90.0
+m06,Jaeho Moon,p06,Clara Yun,same,90.0
+m07,Alice Chung,i06,Irene Ha,same,90.0
+u03,Grace Lee,p03,Taeyang Koo,same,81.0
+m03,Yuna Shin,p03,Taeyang Koo,same,70.0

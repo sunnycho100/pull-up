@@ -1,0 +1,35 @@
+[
+  { "id": "u01", "name": "Jiwon Park", "school": "UW–Madison", "role": "undergrad", "field": "Computer Science", "researchArea": "Computer Vision", "interests": ["startups", "climbing", "korean food"] },
+  { "id": "u02", "name": "Daniel Kim", "school": "UIUC", "role": "undergrad", "field": "Computer Science", "researchArea": "Machine Learning", "interests": ["startups", "gaming", "basketball"] },
+  { "id": "u03", "name": "Grace Lee", "school": "Georgia Tech", "role": "undergrad", "field": "Electrical Engineering", "researchArea": "Robotics", "interests": ["robotics", "climbing", "photography"] },
+  { "id": "u04", "name": "Ethan Cho", "school": "UC Berkeley", "role": "undergrad", "field": "Mechanical Engineering", "researchArea": "Robotics", "interests": ["robotics", "cars", "hiking"] },
+  { "id": "u05", "name": "Hannah Seo", "school": "UMich", "role": "undergrad", "field": "Biology", "researchArea": "Genomics", "interests": ["biotech", "running", "coffee"] },
+  { "id": "u06", "name": "Noah Jang", "school": "Purdue", "role": "undergrad", "field": "Chemical Engineering", "researchArea": "Batteries", "interests": ["climate", "cycling", "cooking"] },
+  { "id": "u07", "name": "Sophia Yoon", "school": "UT Austin", "role": "undergrad", "field": "Data Science", "researchArea": "NLP", "interests": ["startups", "writing", "korean food"] },
+  { "id": "u08", "name": "Lucas Han", "school": "UW–Madison", "role": "undergrad", "field": "Computer Science", "researchArea": "Systems", "interests": ["gaming", "basketball", "coffee"] },
+
+  { "id": "m01", "name": "Minseo Kang", "school": "Stanford", "role": "masters", "field": "Computer Science", "researchArea": "Computer Vision", "interests": ["startups", "photography", "climbing"] },
+  { "id": "m02", "name": "Brian Oh", "school": "CMU", "role": "masters", "field": "Computer Science", "researchArea": "Machine Learning", "interests": ["ai", "gaming", "coffee"] },
+  { "id": "m03", "name": "Yuna Shin", "school": "Georgia Tech", "role": "masters", "field": "Electrical Engineering", "researchArea": "Signal Processing", "interests": ["robotics", "music", "running"] },
+  { "id": "m04", "name": "Kevin Lim", "school": "UMich", "role": "masters", "field": "Mechanical Engineering", "researchArea": "Robotics", "interests": ["robotics", "cars", "climbing"] },
+  { "id": "m05", "name": "Rachel Bae", "school": "Johns Hopkins", "role": "masters", "field": "Biology", "researchArea": "Neuroscience", "interests": ["biotech", "yoga", "coffee"] },
+  { "id": "m06", "name": "Jaeho Moon", "school": "Purdue", "role": "masters", "field": "Chemical Engineering", "researchArea": "Batteries", "interests": ["climate", "cycling", "korean food"] },
+  { "id": "m07", "name": "Alice Chung", "school": "UT Austin", "role": "masters", "field": "Data Science", "researchArea": "NLP", "interests": ["ai", "writing", "coffee"] },
+
+  { "id": "p01", "name": "Dr. Sunghwan Jo", "school": "MIT", "role": "phd", "field": "Computer Science", "researchArea": "Computer Vision", "interests": ["startups", "climbing", "photography"] },
+  { "id": "p02", "name": "Jisoo Nam", "school": "Stanford", "role": "phd", "field": "Computer Science", "researchArea": "Machine Learning", "interests": ["ai", "coffee", "running"] },
+  { "id": "p03", "name": "Taeyang Koo", "school": "Caltech", "role": "phd", "field": "Electrical Engineering", "researchArea": "Robotics", "interests": ["robotics", "cars", "music"] },
+  { "id": "p04", "name": "Elena Suh", "school": "UC Berkeley", "role": "phd", "field": "Mechanical Engineering", "researchArea": "Robotics", "interests": ["robotics", "hiking", "photography"] },
+  { "id": "p05", "name": "Junho Ryu", "school": "Johns Hopkins", "role": "phd", "field": "Biology", "researchArea": "Genomics", "interests": ["biotech", "running", "cooking"] },
+  { "id": "p06", "name": "Clara Yun", "school": "MIT", "role": "phd", "field": "Chemical Engineering", "researchArea": "Batteries", "interests": ["climate", "cycling", "coffee"] },
+  { "id": "p07", "name": "David Ahn", "school": "UT Austin", "role": "phd", "field": "Data Science", "researchArea": "NLP", "interests": ["ai", "startups", "writing"] },
+  { "id": "p08", "name": "Somin Baek", "school": "CMU", "role": "phd", "field": "Computer Science", "researchArea": "Systems", "interests": ["startups", "gaming", "coffee"] },
+  { "id": "p09", "name": "Hyun Woo Ji", "school": "UMich", "role": "phd", "field": "Biology", "researchArea": "Neuroscience", "interests": ["biotech", "yoga", "korean food"] },
+
+  { "id": "i01", "name": "James Cho", "school": "Google", "role": "industry", "field": "Computer Science", "researchArea": "Machine Learning", "interests": ["ai", "startups", "basketball"] },
+  { "id": "i02", "name": "Nara Kwon", "school": "Nvidia", "role": "industry", "field": "Computer Science", "researchArea": "Computer Vision", "interests": ["ai", "photography", "climbing"] },
+  { "id": "i03", "name": "Peter Song", "school": "Tesla", "role": "industry", "field": "Mechanical Engineering", "researchArea": "Robotics", "interests": ["robotics", "cars", "hiking"] },
+  { "id": "i04", "name": "Sophie Jeon", "school": "Genentech", "role": "industry", "field": "Biology", "researchArea": "Genomics", "interests": ["biotech", "running", "coffee"] },
+  { "id": "i05", "name": "Mark Yoo", "school": "QuantumScape", "role": "industry", "field": "Chemical Engineering", "researchArea": "Batteries", "interests": ["climate", "cycling", "cooking"] },
+  { "id": "i06", "name": "Irene Ha", "school": "OpenAI", "role": "industry", "field": "Data Science", "researchArea": "NLP", "interests": ["ai", "writing", "korean food"] }
+]
