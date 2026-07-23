@@ -46,8 +46,9 @@ export default function StepInterests({
 
   return (
     <>
-      <h1 style={{ fontSize: 28, fontWeight: 700 }}>What are you into?</h1>
-      <p style={{ color: "var(--ink-2)", marginTop: 6, fontSize: 15 }}>
+      <span className="ob-kicker">Set up · 2 of 3</span>
+      <h1 className="ob-title">What are you into?</h1>
+      <p className="ob-sub">
         Pick a few. We&apos;ll use these to seat you.{" "}
         <span style={{ color: enough ? "var(--ink-2)" : "var(--accent)", fontWeight: 600 }}>
           {enough ? `${value.length} selected` : "3+ to continue"}
@@ -61,18 +62,9 @@ export default function StepInterests({
             <button
               key={chip}
               type="button"
+              className={on ? "ob-chip on" : "ob-chip"}
               onClick={() => toggle(chip)}
               aria-pressed={on}
-              style={{
-                padding: "8px 14px",
-                borderRadius: 999,
-                fontSize: 14,
-                fontWeight: 500,
-                border: on ? "1px solid var(--accent)" : "1px solid var(--line)",
-                background: on ? "var(--accent)" : "var(--surface)",
-                color: on ? "var(--accent-ink)" : "var(--ink)",
-                transition: "background 150ms ease-out, color 150ms ease-out",
-              }}
             >
               {chip}
             </button>
@@ -85,21 +77,17 @@ export default function StepInterests({
           e.preventDefault();
           addCustom();
         }}
-        style={{ marginTop: 16 }}
+        style={{ marginTop: 18 }}
       >
+        <label className="ob-label" htmlFor="ob-custom" style={{ marginTop: 0 }}>
+          Add your own
+        </label>
         <input
+          id="ob-custom"
+          className="ob-field"
           value={custom}
           onChange={(e) => setCustom(e.target.value)}
-          placeholder="Add your own, press Enter"
-          style={{
-            width: "100%",
-            padding: "12px 14px",
-            fontSize: 16,
-            border: "1px solid var(--line)",
-            borderRadius: 12,
-            background: "var(--bg)",
-            color: "var(--ink)",
-          }}
+          placeholder="Type and press Enter"
         />
       </form>
 
@@ -108,35 +96,14 @@ export default function StepInterests({
       )}
 
       <div style={{ display: "flex", gap: 12, marginTop: 28 }}>
-        <button
-          type="button"
-          onClick={onBack}
-          style={{
-            padding: "14px 20px",
-            borderRadius: 12,
-            fontSize: 16,
-            fontWeight: 600,
-            border: "1px solid var(--line)",
-            color: "var(--ink)",
-          }}
-        >
+        <button type="button" className="ob-back" onClick={onBack}>
           Back
         </button>
         <button
           type="button"
+          className="ob-primary"
           onClick={onContinue}
           disabled={!enough || busy}
-          style={{
-            flex: 1,
-            padding: "14px",
-            borderRadius: 12,
-            fontSize: 16,
-            fontWeight: 600,
-            background: "var(--accent)",
-            color: "var(--accent-ink)",
-            opacity: !enough || busy ? 0.5 : 1,
-            transition: "opacity 180ms ease-out",
-          }}
         >
           {busy ? "Saving…" : "Continue"}
         </button>

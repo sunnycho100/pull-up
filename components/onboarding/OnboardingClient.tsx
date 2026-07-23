@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { saveProfile, setDinnerSignups } from "@/app/actions/profile";
 import StepBasics from "./StepBasics";
 import StepInterests from "./StepInterests";
@@ -22,7 +22,7 @@ export default function OnboardingClient({ userId }: { userId: string }) {
   const params = useSearchParams();
   const step = Math.min(3, Math.max(1, Number(params.get("step")) || 1));
 
-  const [data, setData] = useState<Data>({
+  const EMPTY: Data = {
     name: "",
     school: "",
     position: "",
@@ -30,9 +30,28 @@ export default function OnboardingClient({ userId }: { userId: string }) {
     photo_url: "",
     interests: [],
     slotIds: [],
+  };
+  // Draft survives a refresh / backgrounded tab (only `step` is in the URL).
+  // Same localStorage idiom StepPlans already uses for flight info.
+  const [data, setData] = useState<Data>(() => {
+    if (typeof window === "undefined") return EMPTY;
+    try {
+      const raw = localStorage.getItem("ukc-onboarding");
+      return raw ? { ...EMPTY, ...JSON.parse(raw) } : EMPTY;
+    } catch {
+      return EMPTY;
+    }
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("ukc-onboarding", JSON.stringify(data));
+    } catch {
+      /* quota / private mode — draft just won't persist */
+    }
+  }, [data]);
 
   const patch = (p: Partial<Data>) => setData((d) => ({ ...d, ...p }));
   const goto = (s: number) => router.replace(`/welcome?step=${s}`);
@@ -54,6 +73,11 @@ export default function OnboardingClient({ userId }: { userId: string }) {
     setBusy(false);
     if (!a.ok || !b.ok)
       return setError(a.error ?? b.error ?? "Could not finish");
+    try {
+      localStorage.removeItem("ukc-onboarding");
+    } catch {
+      /* ignore */
+    }
     router.push("/home");
   }
 
@@ -68,7 +92,14 @@ export default function OnboardingClient({ userId }: { userId: string }) {
         flexDirection: "column",
       }}
     >
-      <div style={{ display: "flex", gap: 6, marginBottom: 24 }}>
+      <div
+        role="progressbar"
+        aria-valuemin={1}
+        aria-valuemax={3}
+        aria-valuenow={step}
+        aria-label={`Step ${step} of 3`}
+        style={{ display: "flex", gap: 6, marginBottom: 28 }}
+      >
         {[1, 2, 3].map((s) => (
           <span
             key={s}

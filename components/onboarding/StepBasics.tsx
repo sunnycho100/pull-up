@@ -6,17 +6,6 @@ import { downscale } from "@/lib/avatar";
 
 type Basics = { name: string; school: string; position: string; birthday: string; photo_url: string };
 
-const field: React.CSSProperties = {
-  width: "100%",
-  padding: "12px 14px",
-  fontSize: 16,
-  border: "1px solid var(--line)",
-  borderRadius: 12,
-  background: "var(--bg)",
-  color: "var(--ink)",
-  marginTop: 8,
-};
-
 function initials(name: string) {
   const p = name.trim().split(/\s+/).filter(Boolean);
   return (p[0]?.[0] ?? "") + (p[1]?.[0] ?? "");
@@ -65,12 +54,11 @@ export default function StepBasics({
 
   return (
     <>
-      <h1 style={{ fontSize: 28, fontWeight: 700 }}>Let&apos;s set you up</h1>
-      <p style={{ color: "var(--ink-2)", marginTop: 6, fontSize: 15 }}>
-        Takes under a minute.
-      </p>
+      <span className="ob-kicker">Set up · 1 of 3</span>
+      <h1 className="ob-title">Let&apos;s set you up</h1>
+      <p className="ob-sub">Takes under a minute.</p>
 
-      <div style={{ display: "flex", justifyContent: "center", margin: "28px 0" }}>
+      <div style={{ display: "flex", justifyContent: "center", margin: "26px 0 4px" }}>
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
@@ -120,59 +108,49 @@ export default function StepBasics({
         />
       </div>
       {upload === "error" && (
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: 14,
-            color: "var(--ink-2)",
-            marginTop: -12,
-            marginBottom: 12,
-          }}
-        >
+        <p style={{ textAlign: "center", fontSize: 14, color: "var(--ink-2)", marginBottom: 4 }}>
           Upload failed.{" "}
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            style={{ color: "var(--accent)", fontWeight: 600 }}
-          >
+          <button type="button" className="ob-textlink" onClick={() => fileRef.current?.click()}>
             Retry
           </button>{" "}
           or skip, we&apos;ll use your initials.
         </p>
       )}
 
-      <label style={{ fontSize: 14, fontWeight: 600 }}>Name</label>
+      <label className="ob-label" htmlFor="ob-name" style={{ marginTop: 12 }}>Name</label>
       <input
-        style={field}
+        id="ob-name"
+        className="ob-field"
         value={value.name}
         onChange={(e) => onChange({ name: e.target.value })}
         placeholder="이름 / Your name"
-        autoFocus
       />
-      <label style={{ fontSize: 14, fontWeight: 600, marginTop: 16, display: "block" }}>
-        School / Company
-      </label>
+
+      <label className="ob-label" htmlFor="ob-school">School / Company</label>
       <input
-        style={field}
+        id="ob-school"
+        className="ob-field"
         value={value.school}
         onChange={(e) => onChange({ school: e.target.value })}
         placeholder="Enter here"
       />
-      <label style={{ fontSize: 14, fontWeight: 600, marginTop: 16, display: "block" }}>
-        Position
-      </label>
+
+      <label className="ob-label" htmlFor="ob-position">Position</label>
       <input
-        style={field}
+        id="ob-position"
+        className="ob-field"
         value={value.position}
         onChange={(e) => onChange({ position: e.target.value })}
         placeholder="PhD, Software Engineer, …"
       />
-      <label style={{ fontSize: 14, fontWeight: 600, marginTop: 16, display: "block" }}>
+
+      <label className="ob-label" htmlFor="ob-birthday">
         Birthday <span style={{ color: "var(--ink-3)", fontWeight: 400 }}>· optional</span>
       </label>
       <input
+        id="ob-birthday"
         type="date"
-        style={{ ...field, colorScheme: "dark" }}
+        className="ob-field"
         value={value.birthday}
         max={new Date().toISOString().slice(0, 10)}
         onChange={(e) => onChange({ birthday: e.target.value })}
@@ -184,19 +162,10 @@ export default function StepBasics({
 
       <button
         type="button"
+        className="ob-primary"
         onClick={onContinue}
         disabled={!nameValid || busy || upload === "uploading"}
-        style={{
-          marginTop: 28,
-          padding: "14px",
-          borderRadius: 12,
-          fontSize: 16,
-          fontWeight: 600,
-          background: "var(--accent)",
-          color: "var(--accent-ink)",
-          opacity: !nameValid || busy || upload === "uploading" ? 0.5 : 1,
-          transition: "opacity 180ms ease-out",
-        }}
+        style={{ marginTop: 28 }}
       >
         {busy ? "Saving…" : "Continue"}
       </button>

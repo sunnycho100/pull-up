@@ -4,6 +4,7 @@
    Committed dark identity: deep ink-navy ground, one warm persimmon signal.
    Persimmon appears ONLY on actions and state, never as decoration. */
 :root {
+  color-scheme: dark; /* native controls (date pickers etc.) follow the theme */
   --bg: #0e1420;
   --surface: #161d2b;
   --line: #232c3d;
@@ -21,6 +22,7 @@
 
 /* Light counterpart — inert unless <html data-theme="light"> is set (dev toggle). */
 :root[data-theme="light"] {
+  color-scheme: light;
   --bg: #ffffff;
   --surface: #f5f7fa;
   --line: #e4e8ef;
@@ -65,4 +67,75 @@ h3 {
 ::selection {
   background: var(--accent);
   color: var(--accent-ink);
+}
+
+/* ── Onboarding ────────────────────────────────────────────────────────────
+   Shared so the 3 steps read as one editorial flow and match auth/chat:
+   persimmon kicker → display title → subtitle; de-boxed hairline inputs;
+   hairline rows, not cards. Persimmon stays on actions/state only. */
+.ob-kicker {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--accent);
+}
+.ob-title {
+  font-family: var(--font-display), sans-serif;
+  font-size: 27px; font-weight: 800; letter-spacing: -0.03em;
+  line-height: 1.08; margin: 6px 0 0; text-wrap: balance;
+}
+.ob-sub { color: var(--ink-2); margin-top: 8px; font-size: 15px; line-height: 1.45; }
+
+.ob-label {
+  display: block; font-size: 13px; font-weight: 600; color: var(--ink-2);
+  margin-top: 20px;
+}
+/* Hairline-underline input — de-boxed per the design LAW. */
+.ob-field {
+  width: 100%; margin-top: 4px; padding: 9px 2px; font-size: 16px;
+  background: transparent; color: var(--ink);
+  border: none; border-bottom: 1px solid var(--line); border-radius: 0;
+  outline: none; transition: border-color 150ms ease-out;
+}
+.ob-field:focus { border-bottom-color: var(--accent); }
+.ob-field::placeholder { color: var(--ink-3); }
+
+/* Interest chip — hairline when off, persimmon fill only when on. */
+.ob-chip {
+  min-height: 40px; padding: 8px 14px; border-radius: 999px;
+  font-size: 14px; font-weight: 500;
+  border: 1px solid var(--line); background: transparent; color: var(--ink);
+  transition: border-color 150ms ease-out, background 150ms ease-out, color 150ms ease-out;
+}
+.ob-chip.on { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+
+/* Dinner slot — hairline row, not a card (matches Chat .roster-row). */
+.ob-slot {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  min-height: 56px; padding: 12px 2px; text-align: left;
+  background: transparent; border: none; border-top: 1px solid var(--line);
+}
+.ob-slot:last-of-type { border-bottom: 1px solid var(--line); }
+.ob-check {
+  flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px;
+  display: grid; place-items: center; font-size: 13px;
+  color: var(--accent-ink); border: 1px solid var(--line); background: transparent;
+  transition: background 150ms ease-out, border-color 150ms ease-out;
+}
+.ob-slot.on .ob-check { background: var(--accent); border-color: var(--accent); }
+
+.ob-primary {
+  flex: 1; min-height: 50px; border: 0; border-radius: 12px;
+  background: var(--accent); color: var(--accent-ink);
+  font-size: 16px; font-weight: 700; cursor: pointer;
+  transition: opacity 150ms ease-out;
+}
+.ob-primary:disabled { opacity: 0.45; cursor: default; }
+/* Secondary action — text, not a boxed button. */
+.ob-back {
+  min-height: 50px; padding: 0 6px; border: none; background: none;
+  color: var(--ink-2); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+.ob-back:hover { color: var(--ink); }
+.ob-textlink {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: var(--accent); font-size: 14px; font-weight: 600;
 }

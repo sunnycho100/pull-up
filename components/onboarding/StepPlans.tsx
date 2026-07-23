@@ -11,6 +11,7 @@ function whenLabel(iso: string) {
     weekday: "short",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: "America/New_York",
   });
 }
 
@@ -64,26 +65,23 @@ export default function StepPlans({
   const toggle = (id: string) =>
     onChange(value.includes(id) ? value.filter((v) => v !== id) : [...value, id]);
 
+  const FLIGHT_FIELDS = [
+    ["airline", "Airline", "Airline (e.g. Korean Air)", "text"],
+    ["number", "Flight number", "Flight number (e.g. KE081)", "text"],
+    ["arrival", "Arrival", "Arrival", "datetime-local"],
+  ] as const;
+
   return (
     <>
-      <h1 style={{ fontSize: 28, fontWeight: 700 }}>Which dinners are you in for?</h1>
-      <p style={{ color: "var(--ink-2)", marginTop: 6, fontSize: 15 }}>
-        Pick any. We&apos;ll seat you with people worth meeting.
-      </p>
+      <span className="ob-kicker">Set up · 3 of 3</span>
+      <h1 className="ob-title">Which dinners are you in for?</h1>
+      <p className="ob-sub">Pick any. We&apos;ll seat you with people worth meeting.</p>
 
-      <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ marginTop: 20 }}>
         {slots === null ? (
           <p style={{ color: "var(--ink-2)", fontSize: 14 }}>Loading…</p>
         ) : slots.length === 0 ? (
-          <p
-            style={{
-              color: "var(--ink-2)",
-              fontSize: 14,
-              padding: "16px",
-              background: "var(--surface)",
-              borderRadius: 12,
-            }}
-          >
+          <p style={{ color: "var(--ink-2)", fontSize: 14, paddingTop: 8 }}>
             Dinner slots open soon.
           </p>
         ) : (
@@ -93,34 +91,11 @@ export default function StepPlans({
               <button
                 key={s.id}
                 type="button"
+                className={on ? "ob-slot on" : "ob-slot"}
                 onClick={() => toggle(s.id)}
                 aria-pressed={on}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  padding: "14px 16px",
-                  borderRadius: 12,
-                  textAlign: "left",
-                  border: on ? "1px solid var(--accent)" : "1px solid var(--line)",
-                  background: on ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "var(--bg)",
-                  transition: "border-color 150ms ease-out, background 150ms ease-out",
-                }}
               >
-                <span
-                  aria-hidden
-                  style={{
-                    width: 22,
-                    height: 22,
-                    borderRadius: 6,
-                    display: "grid",
-                    placeItems: "center",
-                    color: "var(--accent-ink)",
-                    fontSize: 14,
-                    border: on ? "1px solid var(--accent)" : "1px solid var(--line)",
-                    background: on ? "var(--accent)" : "transparent",
-                  }}
-                >
+                <span aria-hidden className="ob-check">
                   {on ? "✓" : ""}
                 </span>
                 <span style={{ flex: 1 }}>
@@ -135,42 +110,29 @@ export default function StepPlans({
         )}
       </div>
 
-      <div style={{ marginTop: 20 }}>
+      <div style={{ marginTop: 22 }}>
         <button
           type="button"
+          className="ob-textlink"
           onClick={() => setShowFlight((v) => !v)}
           aria-expanded={showFlight}
-          style={{ fontSize: 14, fontWeight: 600, color: "var(--accent)" }}
         >
           {showFlight ? "− Flight info" : "+ Add flight info (optional)"}
         </button>
         {showFlight && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
-            {(
-              [
-                ["airline", "Airline (e.g. Korean Air)", "text"],
-                ["number", "Flight number (e.g. KE081)", "text"],
-                ["arrival", "Arrival", "datetime-local"],
-              ] as const
-            ).map(([key, ph, type]) => (
+          <div style={{ display: "flex", flexDirection: "column", marginTop: 4 }}>
+            {FLIGHT_FIELDS.map(([key, label, ph, type]) => (
               <input
                 key={key}
                 type={type}
+                className="ob-field"
+                aria-label={label}
                 value={flight[key]}
                 placeholder={ph}
                 onChange={(e) => saveFlight({ ...flight, [key]: e.target.value })}
-                style={{
-                  width: "100%",
-                  padding: "12px 14px",
-                  fontSize: 16,
-                  border: "1px solid var(--line)",
-                  borderRadius: 12,
-                  background: "var(--bg)",
-                  color: "var(--ink)",
-                }}
               />
             ))}
-            <p style={{ fontSize: 13, color: "var(--ink-2)" }}>
+            <p style={{ fontSize: 13, color: "var(--ink-2)", marginTop: 10 }}>
               Used later to suggest airport rides. You can add it anytime.
             </p>
           </div>
@@ -182,36 +144,10 @@ export default function StepPlans({
       )}
 
       <div style={{ display: "flex", gap: 12, marginTop: 28 }}>
-        <button
-          type="button"
-          onClick={onBack}
-          style={{
-            padding: "14px 20px",
-            borderRadius: 12,
-            fontSize: 16,
-            fontWeight: 600,
-            border: "1px solid var(--line)",
-            color: "var(--ink)",
-          }}
-        >
+        <button type="button" className="ob-back" onClick={onBack}>
           Back
         </button>
-        <button
-          type="button"
-          onClick={onFinish}
-          disabled={busy}
-          style={{
-            flex: 1,
-            padding: "14px",
-            borderRadius: 12,
-            fontSize: 16,
-            fontWeight: 600,
-            background: "var(--accent)",
-            color: "var(--accent-ink)",
-            opacity: busy ? 0.5 : 1,
-            transition: "opacity 180ms ease-out",
-          }}
-        >
+        <button type="button" className="ob-primary" onClick={onFinish} disabled={busy}>
           {busy ? "Finishing…" : "Finish"}
         </button>
       </div>
