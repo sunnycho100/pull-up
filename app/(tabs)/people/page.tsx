@@ -11,11 +11,10 @@ export default async function PeoplePage() {
 
   return (
     <section style={{ padding: "24px 20px" }}>
-      <header style={{ marginBottom: 16 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 600 }}>People</h1>
-        <p style={{ color: "var(--ink-2)", marginTop: 6, fontSize: 15 }}>
-          Everyone here this week.
-        </p>
+      <header className="page-head">
+        <p className="page-kicker">UKC 2026</p>
+        <h1 className="page-title">People</h1>
+        <p className="page-sub">Everyone here this week.</p>
       </header>
       <PeopleBrowser people={people ?? []} meId={user.id} />
     </section>

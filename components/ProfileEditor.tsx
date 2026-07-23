@@ -18,29 +18,13 @@ type Profile = {
   photo_url: string | null;
 };
 
-const field: React.CSSProperties = {
-  width: "100%",
-  boxSizing: "border-box",
-  padding: "12px 14px",
-  fontSize: 16,
-  border: "1px solid var(--line)",
-  borderRadius: 12,
-  background: "var(--bg)",
-  color: "var(--ink)",
-  marginTop: 8,
-};
-
 function initials(name: string) {
   const p = name.trim().split(/\s+/).filter(Boolean);
   return ((p[0]?.[0] ?? "") + (p[1]?.[0] ?? "")).toUpperCase() || "·";
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return (
-    <label style={{ fontSize: 14, fontWeight: 600, marginTop: 16, display: "block" }}>
-      {children}
-    </label>
-  );
+  return <label className="ob-label">{children}</label>;
 }
 
 export default function ProfileEditor({
@@ -153,7 +137,9 @@ export default function ProfileEditor({
             {!form.photo_url && initials(form.name)}
           </div>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{form.name || "You"}</div>
+            <div style={{ fontFamily: "var(--font-display), sans-serif", fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em" }}>
+              {form.name || "You"}
+            </div>
             <div style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 2 }}>
               {[form.school, form.position].filter(Boolean).join(" · ") || "Not set"}
             </div>
@@ -248,11 +234,11 @@ export default function ProfileEditor({
       )}
 
       <Label>Name</Label>
-      <input style={field} value={form.name} onChange={(e) => set({ name: e.target.value })} />
+      <input className="ob-field" value={form.name} onChange={(e) => set({ name: e.target.value })} />
       <Label>School / Company</Label>
-      <input style={field} value={form.school} onChange={(e) => set({ school: e.target.value })} />
+      <input className="ob-field" value={form.school} onChange={(e) => set({ school: e.target.value })} />
       <Label>Position</Label>
-      <input style={field} value={form.position} onChange={(e) => set({ position: e.target.value })} />
+      <input className="ob-field" value={form.position} onChange={(e) => set({ position: e.target.value })} />
 
       <Label>Interests</Label>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
@@ -275,7 +261,7 @@ export default function ProfileEditor({
         }}
       >
         <input
-          style={field}
+          className="ob-field"
           value={custom}
           onChange={(e) => setCustom(e.target.value)}
           placeholder="Add an interest, press Enter"
@@ -284,18 +270,19 @@ export default function ProfileEditor({
 
       <Label>Bio</Label>
       <textarea
-        style={{ ...field, resize: "none", minHeight: 72 }}
+        className="ob-field"
+        style={{ resize: "none", minHeight: 72 }}
         value={form.bio}
         onChange={(e) => set({ bio: e.target.value })}
         placeholder="One line about you"
       />
       <Label>KakaoTalk ID</Label>
-      <input style={field} value={form.kakao} onChange={(e) => set({ kakao: e.target.value })} />
+      <input className="ob-field" value={form.kakao} onChange={(e) => set({ kakao: e.target.value })} />
       <Label>LinkedIn</Label>
-      <input style={field} value={form.linkedin} onChange={(e) => set({ linkedin: e.target.value })} />
+      <input className="ob-field" value={form.linkedin} onChange={(e) => set({ linkedin: e.target.value })} />
       <Label>Dietary notes</Label>
       <input
-        style={field}
+        className="ob-field"
         value={form.dietary}
         onChange={(e) => set({ dietary: e.target.value })}
         placeholder="Vegetarian, halal, allergies…"
@@ -397,7 +384,7 @@ function PeStyles() {
         padding: 14px;
         border-radius: 12px;
         font-size: 16px;
-        font-weight: 600;
+        font-weight: 700;
         background: var(--accent);
         color: var(--accent-ink);
         border: none;

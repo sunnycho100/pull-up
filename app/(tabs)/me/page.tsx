@@ -51,7 +51,11 @@ export default async function MePage() {
 
   return (
     <section style={{ padding: "24px 20px" }}>
-      <h1 style={{ fontSize: 28, fontWeight: 600, marginBottom: 20 }}>Me</h1>
+      <header className="page-head">
+        <p className="page-kicker">UKC 2026</p>
+        <h1 className="page-title">Me</h1>
+        <p className="page-sub">Your profile, dinners, and tables.</p>
+      </header>
 
       <ProfileEditor userId={user.id} initial={profile} />
 

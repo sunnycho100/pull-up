@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export type Person = {
@@ -60,6 +60,40 @@ export default function PeopleBrowser({
   const [activeInterest, setActiveInterest] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [contacts, setContacts] = useState<Contacts>({ state: "loading" });
+
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const openerRef = useRef<Element | null>(null);
+
+  // Dialog a11y (parity with the other sheets): focus in on open, restore to
+  // the opener on close, Escape closes, Tab trapped inside.
+  useEffect(() => {
+    if (!openId) return;
+    openerRef.current = document.activeElement;
+    sheetRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return setOpenId(null);
+      if (e.key !== "Tab" || !sheetRef.current) return;
+      const nodes = sheetRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (!nodes.length) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      const a = document.activeElement;
+      if (e.shiftKey && (a === first || a === sheetRef.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && a === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      (openerRef.current as HTMLElement | null)?.focus?.();
+    };
+  }, [openId]);
 
   const allInterests = useMemo(() => {
     const set = new Set<string>();
@@ -134,16 +168,7 @@ export default function PeopleBrowser({
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search name or school"
         aria-label="Search people"
-        style={{
-          width: "100%",
-          boxSizing: "border-box",
-          padding: "12px 14px",
-          fontSize: 16,
-          border: "1px solid var(--line)",
-          borderRadius: 12,
-          background: "var(--bg)",
-          color: "var(--ink)",
-        }}
+        className="ppl-search"
       />
 
       {allInterests.length > 0 && (
@@ -168,7 +193,7 @@ export default function PeopleBrowser({
       {filtered.length === 0 ? (
         <div style={{ padding: "40px 0", textAlign: "center" }}>
           <p style={{ color: "var(--ink-2)", fontSize: 15 }}>
-            No one matches. Clear filters
+            No one matches those filters.
           </p>
           <button
             type="button"
@@ -228,18 +253,21 @@ export default function PeopleBrowser({
       )}
 
       {active && (
-        <div
-          className="sheet-backdrop"
-          onClick={() => setOpenId(null)}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-backdrop" onClick={() => setOpenId(null)}>
+          <div
+            ref={sheetRef}
+            tabIndex={-1}
+            className="sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label={active.name || "Profile"}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="grabber" />
             <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
               <Avatar person={active} size={64} />
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 20, fontWeight: 700 }}>
+                <div className="ppl-name">
                   {active.name || "Someone"}
                   {active.id === meId && <span className="you-tag"> You</span>}
                 </div>
@@ -322,11 +350,39 @@ export default function PeopleBrowser({
                 </div>
               )}
             </div>
+
+            <button className="ppl-close" onClick={() => setOpenId(null)}>
+              Close
+            </button>
           </div>
         </div>
       )}
 
       <style>{`
+        /* De-boxed search — hairline underline, matching onboarding/join fields. */
+        .ppl-search {
+          width: 100%;
+          box-sizing: border-box;
+          padding: 10px 2px;
+          font-size: 16px;
+          background: transparent;
+          color: var(--ink);
+          border: none;
+          border-bottom: 1px solid var(--line);
+          border-radius: 0;
+          outline: none;
+          transition: border-color 150ms ease-out;
+        }
+        .ppl-search:focus { border-bottom-color: var(--accent); }
+        .ppl-search::placeholder { color: var(--ink-3); }
+        .ppl-name {
+          font-family: var(--font-display), sans-serif;
+          font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1;
+        }
+        .ppl-close {
+          width: 100%; margin-top: 18px; border: none; background: transparent;
+          color: var(--ink-3); font-size: 15px; padding: 12px; cursor: pointer;
+        }
         .chip-row {
           display: flex;
           gap: 8px;
@@ -386,11 +442,9 @@ export default function PeopleBrowser({
         }
         .field-label {
           display: block;
-          font-size: 12px;
+          font-size: 13px;
           font-weight: 600;
-          letter-spacing: 0.02em;
-          text-transform: uppercase;
-          color: var(--ink-3);
+          color: var(--ink-2);
           margin-bottom: 10px;
         }
         .skel {
@@ -417,6 +471,7 @@ export default function PeopleBrowser({
           box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
           animation: sheet-up 300ms cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .sheet:focus { outline: none; }
         .grabber {
           width: 36px;
           height: 5px;
