@@ -104,6 +104,9 @@ export default function Chat({
   const [rosterOpen, setRosterOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  // Polite live region: announces only incoming messages (you already know
+  // what you sent). Set from the realtime handler, so history never re-reads.
+  const [announce, setAnnounce] = useState("");
 
   // Seed the profile lookup from the roster so senders resolve instantly —
   // no "…" flash. loadProfiles stays as a fallback for any id not in the group.
@@ -116,6 +119,8 @@ export default function Chat({
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const nearBottom = useRef(true);
+  const headBtnRef = useRef<HTMLButtonElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
 
   const nameOf = (id: string) =>
     id === currentUserId ? "You" : profiles[id]?.name ?? "…";
@@ -180,6 +185,7 @@ export default function Chat({
             prev.some((x) => x.id === m.id) ? prev : [...prev, m],
           );
           loadProfiles([m.user_id]);
+          if (m.user_id !== currentUserId) setAnnounce(`${nameOf(m.user_id)}: ${m.body}`);
         },
       )
       .subscribe();
@@ -200,6 +206,39 @@ export default function Chat({
     if (!el) return;
     nearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
   }
+
+  // Roster sheet dialog controls: Escape closes; focus moves into the sheet on
+  // open and returns to the header button on close, so keyboard/SR users aren't
+  // stranded behind the backdrop.
+  useEffect(() => {
+    if (!rosterOpen) return;
+    const opener = headBtnRef.current;
+    sheetRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return setRosterOpen(false);
+      // Trap Tab inside the sheet so focus can't slip behind the backdrop.
+      if (e.key !== "Tab" || !sheetRef.current) return;
+      const nodes = sheetRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled])',
+      );
+      if (!nodes.length) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      const a = document.activeElement;
+      if (e.shiftKey && (a === first || a === sheetRef.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && a === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      opener?.focus();
+    };
+  }, [rosterOpen]);
 
   async function deliver(tempId: string, body: string) {
     const res = await sendMessage(channelType, channelId, body);
@@ -275,6 +314,7 @@ export default function Chat({
         </button>
 
         <button
+          ref={headBtnRef}
           className="head-id"
           onClick={() => setRosterOpen(true)}
           aria-label={`${members.length} people at your table — open roster`}
@@ -370,9 +410,11 @@ export default function Chat({
                   <div className="bubble bubble-mine">{m.body}</div>
                   {m.pending && <div className="status">Sending…</div>}
                   {m.failed && (
-                    <button className="retry" onClick={() => retry(m)}>
-                      Couldn&apos;t send · Retry
-                    </button>
+                    <div role="alert">
+                      <button className="retry" onClick={() => retry(m)}>
+                        Couldn&apos;t send · Retry
+                      </button>
+                    </div>
                   )}
                 </div>
               );
@@ -403,6 +445,10 @@ export default function Chat({
           })
         )}
         <div ref={bottomRef} />
+      </div>
+
+      <div className="sr-live" aria-live="polite" aria-atomic="true">
+        {announce}
       </div>
 
       <div className="composer">
@@ -440,6 +486,8 @@ export default function Chat({
       {rosterOpen && (
         <div className="sheet-backdrop" onClick={() => setRosterOpen(false)}>
           <div
+            ref={sheetRef}
+            tabIndex={-1}
             className="sheet"
             role="dialog"
             aria-modal="true"
@@ -481,6 +529,13 @@ export default function Chat({
 
       <style>{`
         .chat-root { display: flex; flex-direction: column; height: 100dvh; }
+
+        .sr-live {
+          position: absolute; width: 1px; height: 1px;
+          padding: 0; margin: -1px; overflow: hidden;
+          clip: rect(0 0 0 0); clip-path: inset(50%);
+          white-space: nowrap; border: 0;
+        }
 
         .chat-head {
           display: flex; align-items: center; gap: 4px; flex-shrink: 0;
@@ -548,13 +603,17 @@ export default function Chat({
           font-size: 15px; line-height: 1.38;
           white-space: pre-wrap; word-break: break-word;
         }
+        /* Both neutral — persimmon stays reserved for actions/state. "Me vs them"
+           reads from side, alignment and tail direction; mine sits one step
+           lighter (--line) so it still feels like the near/active voice. */
         .bubble-them { background: var(--surface); color: var(--ink); border-bottom-left-radius: 5px; }
-        .bubble-mine { background: var(--accent); color: var(--accent-ink); border-bottom-right-radius: 5px; }
+        .bubble-mine { background: var(--line); color: var(--ink); border-bottom-right-radius: 5px; }
 
         .status { font-size: 11px; color: var(--ink-3); margin: 3px 4px 0 0; }
         .retry {
-          margin-top: 4px; padding: 4px 10px;
-          font-size: 12px; font-weight: 600;
+          margin-top: 4px; min-height: 44px; padding: 0 16px;
+          display: inline-flex; align-items: center;
+          font-size: 13px; font-weight: 600;
           color: var(--danger); background: none;
           border: 1px solid var(--danger); border-radius: 999px;
           cursor: pointer;
@@ -605,7 +664,7 @@ export default function Chat({
         .composer input {
           flex: 1; padding: 11px 15px;
           border: 1px solid var(--line); border-radius: 22px;
-          font-size: 15px; outline: none;
+          font-size: 16px; outline: none; /* 16px: below this iOS zooms on focus */
           background: var(--surface); color: var(--ink);
         }
         .composer input:focus { border-color: var(--accent); }
@@ -632,6 +691,7 @@ export default function Chat({
           box-shadow: 0 -8px 40px rgba(0,0,0,0.5);
           animation: sheet-up 300ms cubic-bezier(0.16,1,0.3,1);
         }
+        .sheet:focus { outline: none; } /* focus scope, not an interactive control */
         .grabber { width: 36px; height: 5px; border-radius: 999px; background: var(--line); margin: 6px auto 14px; }
         .sheet-kicker {
           font-size: 11px; font-weight: 700; text-transform: uppercase;
