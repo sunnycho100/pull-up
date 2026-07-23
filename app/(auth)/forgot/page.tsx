@@ -64,11 +64,7 @@ export default function ForgotPage() {
               placeholder="you@university.edu"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={{
-                width: "100%", padding: "12px 14px", fontSize: 16,
-                border: "1px solid var(--line)", borderRadius: 10,
-                background: "var(--bg)", color: "var(--ink)", outline: "none",
-              }}
+              className="au-uinput"
             />
             {error && <p style={{ color: "var(--danger)", fontSize: 13, marginTop: 12 }}>{error}</p>}
             <button

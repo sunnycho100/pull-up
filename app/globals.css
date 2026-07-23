@@ -69,6 +69,16 @@ h3 {
   color: var(--accent-ink);
 }
 
+/* De-boxed auth input — hairline underline, shared by forgot/reset. */
+.au-uinput {
+  width: 100%; padding: 9px 2px; font-size: 16px;
+  background: transparent; color: var(--ink);
+  border: none; border-bottom: 1px solid var(--line); border-radius: 0;
+  outline: none; transition: border-color 0.15s ease;
+}
+.au-uinput:focus { border-bottom-color: var(--accent); }
+.au-uinput::placeholder { color: var(--ink-3); }
+
 /* ── Tab page masthead ─────────────────────────────────────────────────────
    Shared editorial header for the tab surfaces (matches home/rides):
    persimmon kicker → display title → subtitle. */

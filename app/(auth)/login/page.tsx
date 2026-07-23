@@ -235,12 +235,12 @@ function AuthStyles() {
       .au-or::before, .au-or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
       .au-label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); }
       .au-input {
-        width: 100%; margin-top: 7px; padding: 12px 14px; font-size: 16px;
-        border: 1px solid var(--line); border-radius: 10px;
-        background: var(--bg); color: var(--ink); outline: none;
+        width: 100%; margin-top: 7px; padding: 9px 2px; font-size: 16px;
+        border: none; border-bottom: 1px solid var(--line); border-radius: 0;
+        background: transparent; color: var(--ink); outline: none;
         transition: border-color 0.15s ease;
       }
-      .au-input:focus { border-color: var(--accent); }
+      .au-input:focus { border-bottom-color: var(--accent); }
       .au-input::placeholder { color: var(--ink-3); }
       .au-error { color: var(--danger); font-size: 13px; margin-top: 12px; }
       .au-primary {
