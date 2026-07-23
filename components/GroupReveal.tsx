@@ -40,6 +40,36 @@ function fmtTime(t: string | null) {
   });
 }
 
+function initials(name?: string) {
+  const p = (name ?? "").trim().split(/\s+/).filter(Boolean);
+  return ((p[0]?.[0] ?? "") + (p[1]?.[0] ?? "")).toUpperCase() || "·";
+}
+
+function Avatar({ name, url }: { name?: string; url?: string | null }) {
+  return (
+    <span
+      aria-hidden
+      style={{
+        flexShrink: 0,
+        width: 44,
+        height: 44,
+        borderRadius: "50%",
+        border: "1px solid var(--line)",
+        background: url ? `center/cover no-repeat url("${url}")` : "var(--surface)",
+        color: "var(--ink-2)",
+        display: "grid",
+        placeItems: "center",
+        fontSize: 16,
+        fontWeight: 700,
+        fontFamily: "var(--font-display), sans-serif",
+        overflow: "hidden",
+      }}
+    >
+      {!url && initials(name)}
+    </span>
+  );
+}
+
 export default function GroupReveal({
   groupId,
   name,
@@ -144,6 +174,7 @@ export default function GroupReveal({
                 : "none",
             }}
           >
+            <Avatar name={m.name} url={m.photo_url} />
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
                 <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "var(--font-display)", letterSpacing: "-0.01em" }}>
