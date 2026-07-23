@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Slot, Signup } from "./MealsList";
 
 const dtf = new Intl.DateTimeFormat("en-US", {
@@ -39,9 +39,46 @@ export default function JoinSheet({
   const [partySize, setPartySize] = useState<number>(signup?.partySize ?? 1);
   const [notes, setNotes] = useState(signup?.notes ?? "");
 
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const openerRef = useRef<Element | null>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // Dialog controls (parity with Chat's roster sheet): focus moves in on open
+  // and restores to the opener on close; Escape closes; Tab is trapped inside.
+  useEffect(() => {
+    openerRef.current = document.activeElement;
+    sheetRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return onCloseRef.current();
+      if (e.key !== "Tab" || !sheetRef.current) return;
+      const nodes = sheetRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (!nodes.length) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      const a = document.activeElement;
+      if (e.shiftKey && (a === first || a === sheetRef.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && a === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      (openerRef.current as HTMLElement | null)?.focus?.();
+    };
+  }, []);
+
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <div
+        ref={sheetRef}
+        tabIndex={-1}
         className="sheet"
         role="dialog"
         aria-modal="true"
@@ -50,8 +87,9 @@ export default function JoinSheet({
       >
         <div className="grabber" aria-hidden="true" />
 
-        <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>{slot.title}</h2>
-        <p style={{ fontSize: 14, color: "var(--ink-2)", marginBottom: 20 }}>
+        <p className="sheet-kicker">Dinner</p>
+        <h2 className="sheet-title">{slot.title}</h2>
+        <p className="sheet-sub">
           {dtf.format(new Date(slot.starts_at))} · {slot.area}
         </p>
 
@@ -131,6 +169,7 @@ export default function JoinSheet({
           box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
           animation: sheet-up 300ms cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .sheet:focus { outline: none; } /* focus scope, not an interactive control */
         .grabber {
           width: 36px;
           height: 5px;
@@ -138,35 +177,40 @@ export default function JoinSheet({
           background: var(--line);
           margin: 6px auto 16px;
         }
+        /* Editorial masthead — matches Chat's roster sheet. */
+        .sheet-kicker {
+          font-size: 11px; font-weight: 700; text-transform: uppercase;
+          letter-spacing: 0.08em; color: var(--accent);
+        }
+        .sheet-title {
+          font-family: var(--font-display), sans-serif;
+          font-size: 24px; font-weight: 800; letter-spacing: -0.03em;
+          margin: 4px 0 2px;
+        }
+        .sheet-sub { font-size: 14px; color: var(--ink-2); margin-bottom: 22px; }
         .field-label {
           display: block;
-          font-size: 12px;
+          font-size: 13px;
           font-weight: 600;
-          letter-spacing: 0.02em;
-          text-transform: uppercase;
-          color: var(--ink-3);
-          margin-bottom: 8px;
+          color: var(--ink-2);
+          margin-bottom: 10px;
         }
-        .seg {
-          display: flex;
-          gap: 6px;
-          background: var(--surface);
-          padding: 4px;
-          border-radius: 12px;
-        }
+        /* Party size — hairline pills, not a grey segmented box. */
+        .seg { display: flex; gap: 8px; }
         .seg__opt {
           flex: 1;
-          border: none;
+          min-height: 44px;
+          border: 1px solid var(--line);
           background: transparent;
-          color: var(--ink-2);
+          color: var(--ink);
           font-size: 15px;
           font-weight: 600;
-          padding: 10px 0;
-          border-radius: 9px;
+          border-radius: 999px;
           cursor: pointer;
-          transition: background 150ms ease-out, color 150ms ease-out;
+          transition: border-color 150ms ease-out, background 150ms ease-out, color 150ms ease-out;
         }
         .seg__opt--on {
+          border-color: var(--accent);
           background: var(--accent);
           color: var(--accent-ink);
         }
@@ -176,21 +220,24 @@ export default function JoinSheet({
           margin: 10px 2px 0;
           line-height: 1.4;
         }
+        /* De-boxed to a hairline underline, matching the onboarding fields. */
         .notes {
           width: 100%;
           box-sizing: border-box;
           font: inherit;
-          font-size: 15px;
+          font-size: 16px;
           color: var(--ink);
-          background: var(--bg);
-          border: 1px solid var(--line);
-          border-radius: 12px;
-          padding: 12px;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid var(--line);
+          border-radius: 0;
+          padding: 8px 2px;
           resize: none;
         }
+        .notes::placeholder { color: var(--ink-3); }
         .notes:focus {
           outline: none;
-          border-color: var(--accent);
+          border-bottom-color: var(--accent);
         }
         .btn-primary {
           width: 100%;
@@ -199,7 +246,7 @@ export default function JoinSheet({
           background: var(--accent);
           color: var(--accent-ink);
           font-size: 16px;
-          font-weight: 600;
+          font-weight: 700;
           padding: 14px;
           border-radius: 12px;
           cursor: pointer;

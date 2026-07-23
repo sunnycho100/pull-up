@@ -69,6 +69,21 @@ h3 {
   color: var(--accent-ink);
 }
 
+/* ── Tab page masthead ─────────────────────────────────────────────────────
+   Shared editorial header for the tab surfaces (matches home/rides):
+   persimmon kicker → display title → subtitle. */
+.page-head { margin-bottom: 20px; }
+.page-kicker {
+  font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--accent);
+}
+.page-title {
+  font-family: var(--font-display), sans-serif;
+  font-size: 34px; font-weight: 800; letter-spacing: -0.03em;
+  line-height: 1.02; margin-top: 10px;
+}
+.page-sub { margin-top: 10px; font-size: 15px; color: var(--ink-2); max-width: 40ch; }
+
 /* ── Onboarding ────────────────────────────────────────────────────────────
    Shared so the 3 steps read as one editorial flow and match auth/chat:
    persimmon kicker → display title → subtitle; de-boxed hairline inputs;

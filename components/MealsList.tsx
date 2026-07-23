@@ -196,7 +196,7 @@ export default function MealsList({
           to { opacity: 1; transform: translate(-50%, 0); }
         }
         @media (prefers-reduced-motion: reduce) {
-          .btn-join { transition: none; }
+          .act--join span { transition: none; }
           .toast { animation: none; }
         }
       `}</style>

@@ -26,11 +26,10 @@ export default async function MealsPage() {
 
   return (
     <section style={{ padding: "24px 20px" }}>
-      <header style={{ marginBottom: 20 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 600 }}>Meals</h1>
-        <p style={{ color: "var(--ink-2)", marginTop: 6, fontSize: 15 }}>
-          Grab dinner with people worth meeting.
-        </p>
+      <header className="page-head">
+        <p className="page-kicker">UKC 2026</p>
+        <h1 className="page-title">Meals</h1>
+        <p className="page-sub">Grab dinner with people worth meeting.</p>
       </header>
 
       {!slots?.length ? (
